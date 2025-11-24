@@ -742,25 +742,26 @@
             // Reset state
             isAnswered = false;
             els.messageArea.textContent = '';
+            els.messageArea.className = 'h-16 mt-4 flex items-center justify-center text-center font-medium'; // Reset class
             els.feedbackIcon.classList.add('hidden');
             els.submitBtn.classList.remove('hidden');
             els.nextBtn.classList.add('hidden');
             
-            // Hint button state is no longer managed here as it's unlimited
+            // Ensure input is enabled/reset for spelling mode
+            els.input.disabled = false;
+            els.input.classList.remove('correct', 'incorrect');
+            els.input.placeholder = "Type translation...";
 
             if (quizMode === 'spelling') {
                 els.mcContainer.classList.add('hidden');
                 els.spellingContainer.classList.remove('hidden');
                 els.input.value = '';
                 els.input.focus();
-                // Ensure hint button is visible only in spelling mode
                 els.hintBtn.classList.remove('hidden');
             } else { // Multiple Choice
                 els.spellingContainer.classList.add('hidden');
                 els.mcContainer.classList.remove('hidden');
-                // Hide hint button in MC mode
                 els.hintBtn.classList.add('hidden');
-
                 renderMultipleChoice(currentItem);
             }
 
@@ -808,8 +809,13 @@
                 isCorrect = correctAnswers.some(ans => normalizeText(ans) === normalizedUserAnswer);
                 correctAnswerString = correctAnswers.join(' / ');
                 
-                // Set the focus back on the input for easy correction
-                els.input.focus();
+                if (isCorrect) {
+                     els.input.disabled = true;
+                     els.input.classList.add('correct');
+                } else {
+                     shakeInput();
+                     els.input.classList.add('incorrect');
+                }
 
             } else { // Multiple Choice
                 if (!selectedMCOption) {
@@ -825,7 +831,10 @@
                 // Show feedback on buttons
                 document.querySelectorAll('.mc-option').forEach(btn => {
                     const optionAnswer = btn.getAttribute('data-answer');
-                    if (correctAnswers.some(ans => normalizeText(ans) === normalizeText(optionAnswer))) {
+                    // Check if the option is one of the correct answers
+                    const isOptionCorrect = correctAnswers.some(ans => normalizeText(ans) === normalizeText(optionAnswer));
+
+                    if (isOptionCorrect) {
                         btn.classList.add('correct');
                     }
                     if (normalizeText(optionAnswer) === normalizeText(userAnswer) && !isCorrect) {
@@ -856,15 +865,20 @@
                 els.messageArea.innerHTML = `¡Incorrecto! La respuesta correcta es: <span class="font-bold text-indigo-600">${correctAnswerString}</span>`;
                 els.feedbackIcon.innerHTML = `<i class="fas fa-times-circle text-red-500"></i>`;
                 els.feedbackIcon.classList.remove('hidden');
-                shakeInput();
             }
 
             updateStats();
         }
 
         function nextQuestion() {
-            currentIndex++;
-            loadQuestion();
+            // Check if we are at the end of the queue
+            if (currentIndex < currentQueue.length - 1) {
+                currentIndex++;
+                loadQuestion();
+            } else {
+                // If we are at the last question, show the result screen
+                showResultScreen();
+            }
         }
 
         function showResultScreen() {
