@@ -41,6 +41,27 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8; 
         }
+        /* Style for the answer options */
+        .mc-option {
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .mc-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+        .correct {
+            border-color: #10b981 !important; /* Tailwind teal-500 */
+            background-color: #e6fffa !important; /* Tailwind teal-50 */
+        }
+        .incorrect {
+            border-color: #ef4444 !important; /* Tailwind red-500 */
+            background-color: #fee2e2 !important; /* Tailwind red-50 */
+        }
+        .revealed-correct {
+            border-color: #2563eb !important; /* Tailwind blue-600 */
+            background-color: #eff6ff !important; /* Tailwind blue-50 */
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col items-center justify-center p-4">
@@ -49,9 +70,15 @@
     <div class="w-full max-w-lg bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100 relative h-[600px] flex flex-col">
         
         <!-- Header / Progress -->
-        <div id="header-section" class="bg-indigo-600 p-6 text-white hidden flex-shrink-0">
+        <div id="header-section" class="bg-indigo-600 p-4 text-white hidden flex-shrink-0">
             <div class="flex justify-between items-center mb-2">
-                <span class="font-bold text-lg"><i class="fas fa-city mr-2"></i>Ciudades Quiz</span>
+                <!-- Back Button -->
+                <button onclick="handleGameScreenBack()" class="p-1 rounded-full hover:bg-indigo-700 transition-colors">
+                    <i class="fas fa-arrow-left text-lg"></i>
+                </button>
+                <span class="font-bold text-lg flex-grow text-center">
+                    <i class="fas fa-city mr-2"></i>Ciudades Quiz
+                </span>
                 <div class="flex items-center space-x-4">
                     <span class="bg-indigo-500 px-3 py-1 rounded-full text-sm font-medium">
                         <i class="fas fa-fire text-orange-400 mr-1"></i> <span id="streak-display">0</span>
@@ -179,6 +206,14 @@
                     
                     <!-- Spelling Mode Container -->
                     <div id="spelling-mode-container">
+                         <!-- Hint Button -->
+                        <div class="flex justify-center mb-4">
+                            <!-- Hint button is now always enabled -->
+                            <button id="hint-btn" onclick="showHint()" class="bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-full text-sm transition-colors shadow-md shadow-orange-200 flex items-center">
+                                <i class="fas fa-lightbulb mr-2"></i> Hint
+                            </button>
+                        </div>
+
                         <div class="relative">
                             <input type="text" id="answer-input" 
                                 class="w-full bg-slate-50 border-2 border-slate-200 text-slate-800 text-lg font-medium rounded-xl p-4 text-center focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all placeholder-slate-300"
@@ -253,45 +288,67 @@
 
     <!-- Footer -->
     <div class="mt-8 text-center text-slate-400 text-sm">
-        <p>Tip: Punctuation is ignored.</p>
+        <p>Tip: Punctuation is ignored. Hints are unlimited in spelling mode. Adjectives accept masculine/feminine forms.</p>
     </div>
 
     <script>
         // Structured Data for Categories
+        // Adjectives now include both masculine and feminine forms for flexibility.
         const groupedVocab = {
             "Adjetivos: Positivos": [
-                { en: "beautiful / lovely", es: ["preciosa"] },
-                { en: "well looked-after", es: ["cuidada"] },
-                { en: "clean", es: ["limpia"] },
-                { en: "grand / full of monuments", es: ["monumental"] },
-                { en: "calm / peaceful", es: ["tranquila"] },
-                { en: "traditional", es: ["tradicional"] },
-                { en: "artistic", es: ["artística"] },
-                { en: "historic", es: ["histórica"] },
-                { en: "well preserved", es: ["bien conservada", "conservada"] },
-                { en: "cosmopolitan / international", es: ["cosmopolita"] },
-                { en: "lively / vibrant", es: ["viva", "vibrante"] },
-                { en: "special", es: ["especial"] },
-                { en: "well organised", es: ["bien organizada", "organizada"] },
-                { en: "open-minded / open", es: ["abierta"] }
+                // preciosa (f) / precioso (m)
+                { en: "beautiful / lovely", es: ["preciosa", "precioso"] }, 
+                // cuidada (f) / cuidado (m)
+                { en: "well looked-after", es: ["cuidada", "cuidado"] }, 
+                // limpia (f) / limpio (m)
+                { en: "clean", es: ["limpia", "limpio"] }, 
+                { en: "grand / full of monuments", es: ["monumental"] }, // Invariant
+                // tranquila (f) / tranquilo (m)
+                { en: "calm / peaceful", es: ["tranquila", "tranquilo"] }, 
+                { en: "traditional", es: ["tradicional"] }, // Invariant
+                // artística (f) / artístico (m)
+                { en: "artistic", es: ["artística", "artístico"] }, 
+                // histórica (f) / histórico (m)
+                { en: "historic", es: ["histórica", "histórico"] }, 
+                // bien conservada (f) / bien conservado (m)
+                { en: "well preserved", es: ["bien conservada", "bien conservado", "conservada", "conservado"] }, 
+                { en: "cosmopolitan / international", es: ["cosmopolita"] }, // Invariant
+                // viva (f) / vivo (m)
+                { en: "lively / vibrant", es: ["viva", "vivo", "vibrante"] }, // 'vibrante' is invariant
+                { en: "special", es: ["especial"] }, // Invariant
+                // bien organizada (f) / bien organizado (m)
+                { en: "well organised", es: ["bien organizada", "bien organizado", "organizada", "organizado"] }, 
+                // abierta (f) / abierto (m)
+                { en: "open-minded / open", es: ["abierta", "abierto"] } 
             ],
             "Adjetivos: Negativos": [
-                { en: "horrible", es: ["horrible"] },
-                { en: "messy / disorganised", es: ["desordenada", "desorganizada"] },
-                { en: "dirty", es: ["sucia"] },
-                { en: "noisy", es: ["ruidosa"] },
-                { en: "boring", es: ["aburrida"] },
-                { en: "polluted", es: ["contaminada"] },
-                { en: "run-down / decaying", es: ["decadente"] },
-                { en: "badly preserved", es: ["mal conservada"] },
-                { en: "dangerous", es: ["peligrosa"] },
-                { en: "closed / narrow-minded", es: ["cerrada"] }
+                { en: "horrible", es: ["horrible"] }, // Invariant
+                // desordenada (f) / desordenado (m) - already included both -organizada/-organizado variants
+                { en: "messy / disorganised", es: ["desordenada", "desordenado", "desorganizada", "desorganizado"] }, 
+                // sucia (f) / sucio (m)
+                { en: "dirty", es: ["sucia", "sucio"] }, 
+                // ruidosa (f) / ruidoso (m)
+                { en: "noisy", es: ["ruidosa", "ruidoso"] }, 
+                // aburrida (f) / aburrido (m)
+                { en: "boring", es: ["aburrida", "aburrido"] }, 
+                // contaminada (f) / contaminado (m)
+                { en: "polluted", es: ["contaminada", "contaminado"] }, 
+                { en: "run-down / decaying", es: ["decadente"] }, // Invariant
+                // mal conservada (f) / mal conservado (m)
+                { en: "badly preserved", es: ["mal conservada", "mal conservado"] }, 
+                // peligrosa (f) / peligroso (m)
+                { en: "dangerous", es: ["peligrosa", "peligroso"] }, 
+                // cerrada (f) / cerrado (m)
+                { en: "closed / narrow-minded", es: ["cerrada", "cerrado"] } 
             ],
             "Adjetivos: Neutrales": [
-                { en: "human / people-focused", es: ["humana"] },
-                { en: "cheerful / lively", es: ["alegre"] },
-                { en: "old / traditional", es: ["antigua"] },
-                { en: "urban", es: ["urbana"] }
+                // humana (f) / humano (m)
+                { en: "human / people-focused", es: ["humana", "humano"] }, 
+                { en: "cheerful / lively", es: ["alegre"] }, // Invariant
+                // antigua (f) / antiguo (m)
+                { en: "old / traditional", es: ["antigua", "antiguo"] }, 
+                // urbana (f) / urbano (m)
+                { en: "urban", es: ["urbana", "urbano"] } 
             ],
             "Vocabulario Clave": [
                 { en: "traffic", es: ["el tráfico", "tráfico"] },
@@ -307,7 +364,8 @@
                 { en: "to have a few glasses of wine", es: ["tomar unos vinos"] },
                 { en: "the bar on the corner", es: ["el bar de la esquina"] },
                 { en: "neighbourhood", es: ["barrio", "el barrio"] },
-                { en: "welcoming", es: ["acogedora"] }
+                // acogedora (f) / acogedor (m)
+                { en: "welcoming", es: ["acogedora", "acogedor"] }
             ],
             "Expresiones: Opiniones": [
                 { en: "In my opinion...", es: ["en mi opinión"] },
@@ -334,7 +392,7 @@
                 { en: "It has a warm atmosphere", es: ["tiene un ambiente muy cálido"] },
                 { en: "It's very cosmopolitan", es: ["es muy cosmopolita"] },
                 { en: "The worst thing is...", es: ["lo peor de la ciudad es", "lo peor es"] },
-                { en: "It's too noisy", es: ["es demasiado ruidosa"] },
+                { en: "It's too noisy", es: ["es demasiado ruidosa", "es demasiado ruidoso"] }, // Updated
                 { en: "There are too many people", es: ["hay demasiada gente"] },
                 { en: "The traffic is unbearable", es: ["el tráfico es insoportable"] },
                 { en: "It has good and bad things", es: ["tiene cosas buenas y malas"] },
@@ -385,6 +443,7 @@
             spellingContainer: document.getElementById('spelling-mode-container'),
             mcContainer: document.getElementById('mc-mode-container'),
             accentKeys: document.getElementById('accent-keys'),
+            hintBtn: document.getElementById('hint-btn'), 
             selectAllCheckbox: null, 
             quizLengthSelect: document.getElementById('quiz-length-select') 
         };
@@ -473,6 +532,16 @@
                 }, 500);
             }
         }
+        
+        function alertUser(message, className = 'text-red-500') {
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-4 left-1/2 transform -translate-x-1/2 p-3 rounded-xl shadow-2xl z-50 bg-white border border-slate-200 ${className} font-semibold fade-in`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
 
         // --- Navigation Functions ---
 
@@ -502,6 +571,12 @@
             screens.config.classList.remove('hidden');
             screens.config.classList.add('flex');
             renderCategoryCheckboxes(); // Ensure current selection is displayed
+        }
+        
+        function handleGameScreenBack() {
+            // Simple exit back to the start screen, losing current progress.
+            showStartScreen();
+            alertUser("Quiz exited. Back to menu.", 'text-slate-600');
         }
 
         function quickStartGame() {
@@ -572,14 +647,47 @@
             startGame(currentQueue.length);
         }
         
-        function alertUser(message, className = 'text-red-500') {
-            const toast = document.createElement('div');
-            toast.className = `fixed bottom-4 left-1/2 transform -translate-x-1/2 p-3 rounded-xl shadow-2xl z-50 bg-white border border-slate-200 ${className} font-semibold fade-in`;
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
+        // --- Hint Logic (Now unlimited) ---
+        function showHint() {
+            if (quizMode !== 'spelling' || isAnswered) return;
+
+            const currentItem = currentQueue[currentIndex];
+            const correctAnswer = normalizeText(currentItem.es[0]); // Use first translation as the primary correct answer
+            const currentInput = normalizeText(els.input.value);
+
+            // Find the index of the first differing character
+            let hintIndex = 0;
+            let currentInputClean = normalizeText(els.input.value);
+            
+            // Find the position where the input deviates from the correct answer
+            while (hintIndex < correctAnswer.length && hintIndex < currentInputClean.length && currentInputClean[hintIndex] === correctAnswer[hintIndex]) {
+                hintIndex++;
+            }
+
+            // Only provide a hint if the user has not completed the correct answer
+            if (hintIndex < correctAnswer.length) {
+                const charToReveal = correctAnswer[hintIndex];
+                
+                // Get the original value up to the hint index
+                let originalValue = els.input.value.slice(0, hintIndex);
+                
+                // If the original value was shorter than the hint index, it means there were spaces/punctuation that got normalized.
+                // We ensure the new input value is built correctly from the prefix + new character.
+                const newInputValue = originalValue + charToReveal;
+                
+                // Set the new input value and move cursor to the end
+                els.input.value = newInputValue;
+                els.input.focus();
+                els.input.setSelectionRange(newInputValue.length, newInputValue.length);
+
+                alertUser(`Hint used: '${charToReveal}' revealed.`, 'text-blue-500');
+            } else if (currentInput === correctAnswer) {
+                // Answer is already correct
+                alertUser("You already have the correct answer!", 'text-green-500');
+            } else {
+                 // User has typed something incorrect *after* the correct answer length
+                 alertUser("The hint is available when you're stuck on the next required letter.", 'text-amber-500');
+            }
         }
 
         // --- Quiz Flow Logic ---
@@ -609,264 +717,211 @@
             // Shuffle and pick up to 3 distractors
             const distractors = shuffle(incorrectOptions).slice(0, 3);
             
-            let options = [...distractors, correctTranslation];
+            // Combine and shuffle the options
+            const options = shuffle([correctTranslation, ...distractors]).slice(0, 4); 
             
-            // Ensure we have exactly 4 options by padding with placeholders if necessary
+            // Handle edge case where we might get less than 4 options (e.g., if vocab list is small)
             while (options.length < 4) {
-                // Find a random word from the whole database that isn't the correct answer
-                const randomWord = shuffle(Object.values(groupedVocab).flat()).find(item => !correctNormalized.includes(normalizeText(item.es[0])));
-                if (randomWord) {
-                     options.push(randomWord.es[0]);
-                } else {
-                     options.push("...?"); 
-                }
+                 // Fallback: If less than 4 options, pad with a generic placeholder
+                 if (options.length < 4) options.push('...Missing Option...');
             }
 
-            // Remove duplicates and shuffle
-            options = Array.from(new Set(options));
-            options = options.slice(0, 4); // Trim back to 4 if duplicates were removed
-
-            return shuffle(options);
+            return options;
         }
+
 
         function loadQuestion() {
-            isAnswered = false;
-            const item = currentQueue[currentIndex];
-            
-            els.questionWord.textContent = item.en;
-            els.input.value = "";
-            els.input.disabled = false;
-            els.input.classList.remove('border-red-500', 'border-green-500', 'text-green-600', 'text-red-600');
-            els.input.classList.add('border-slate-200', 'text-slate-800');
-            
-            els.submitBtn.classList.remove('hidden');
-            els.nextBtn.classList.add('hidden');
-            els.feedbackIcon.classList.add('hidden');
-            els.messageArea.innerHTML = "";
-            
-            // Mode-specific display logic
-            if (quizMode === 'spelling') {
-                els.spellingContainer.classList.remove('hidden');
-                els.mcContainer.classList.add('hidden');
-                els.submitBtn.style.display = 'block';
-                els.input.focus();
-            } else { // multiple-choice
-                els.spellingContainer.classList.add('hidden');
-                els.mcContainer.classList.remove('hidden');
-                els.submitBtn.style.display = 'none'; // Submit button is irrelevant in MC
-                renderMultipleChoiceOptions(item);
-            }
-            
-            updateStats();
-        }
-
-        function renderMultipleChoiceOptions(item) {
-            els.mcContainer.innerHTML = ''; // Clear previous options
-            const options = generateMultipleChoiceOptions(item);
-
-            options.forEach((option, index) => {
-                const btn = document.createElement('button');
-                btn.className = `mc-option-btn w-full text-left font-semibold py-3 px-4 rounded-xl transition-all 
-                                 bg-slate-100 hover:bg-indigo-50 hover:border-indigo-400 border-2 border-slate-200 text-slate-700`;
-                btn.textContent = `${index + 1}. ${option}`;
-                btn.setAttribute('data-answer', option);
-                btn.onclick = () => selectOption(option);
-                els.mcContainer.appendChild(btn);
-            });
-        }
-
-        function selectOption(selectedTranslation) {
-            if (isAnswered) return;
-            
-            isAnswered = true;
-            const currentItem = currentQueue[currentIndex];
-            const correctAnswers = currentItem.es.map(s => normalizeText(s));
-            const selectedCleaned = normalizeText(selectedTranslation);
-
-            const isCorrect = correctAnswers.includes(selectedCleaned);
-            
-            // Visually highlight all options
-            document.querySelectorAll('.mc-option-btn').forEach(btn => {
-                btn.disabled = true;
-                const btnAnswerCleaned = normalizeText(btn.getAttribute('data-answer'));
-                
-                if (correctAnswers.includes(btnAnswerCleaned)) {
-                    // Correct answer
-                    btn.classList.add('bg-green-100', 'border-green-500', 'text-green-800', 'shadow-md');
-                    btn.classList.remove('bg-slate-100', 'hover:bg-indigo-50');
-                } else if (btnAnswerCleaned === selectedCleaned) {
-                    // Incorrect selected answer
-                    btn.classList.add('bg-red-100', 'border-red-500', 'text-red-800', 'shadow-md');
-                    btn.classList.remove('bg-slate-100', 'hover:bg-indigo-50');
-                } else {
-                    // Unselected wrong answer
-                    btn.classList.add('opacity-50');
-                }
-            });
-
-            if (isCorrect) {
-                handleCorrect();
-            } else {
-                handleIncorrect(currentItem.es[0]);
-            }
-
-            els.nextBtn.classList.remove('hidden');
-            els.nextBtn.focus();
-        }
-
-        function checkAnswer() {
-            if (quizMode === 'multiple-choice') return; // Handled by selectOption
-
-            if (isAnswered) return;
-            
-            const rawInput = els.input.value;
-            const cleanInput = normalizeText(rawInput);
-            
-            const currentItem = currentQueue[currentIndex];
-            const correctAnswers = currentItem.es.map(s => normalizeText(s));
-
-            if (!rawInput) {
-                shakeInput();
+            if (currentIndex >= currentQueue.length) {
+                showResultScreen();
                 return;
             }
 
-            isAnswered = true;
-            els.input.disabled = true;
-
-            const isCorrect = correctAnswers.includes(cleanInput);
-
-            if (isCorrect) {
-                handleCorrect();
-            } else {
-                handleIncorrect(currentItem.es[0]);
-            }
-
-            els.submitBtn.classList.add('hidden');
-            els.nextBtn.classList.remove('hidden');
-            els.nextBtn.focus();
-        }
-
-        function handleCorrect() {
-            score++;
-            streak++;
+            const currentItem = currentQueue[currentIndex];
+            els.questionWord.textContent = currentItem.en;
             
+            // Reset state
+            isAnswered = false;
+            els.messageArea.textContent = '';
+            els.feedbackIcon.classList.add('hidden');
+            els.submitBtn.classList.remove('hidden');
+            els.nextBtn.classList.add('hidden');
+            
+            // Hint button state is no longer managed here as it's unlimited
+
             if (quizMode === 'spelling') {
-                els.input.classList.remove('border-slate-200', 'text-slate-800');
-                els.input.classList.add('border-green-500', 'text-green-600');
-                els.feedbackIcon.innerHTML = '<i class="fas fa-check-circle text-green-500"></i>';
-                els.feedbackIcon.classList.remove('hidden');
+                els.mcContainer.classList.add('hidden');
+                els.spellingContainer.classList.remove('hidden');
+                els.input.value = '';
+                els.input.focus();
+                // Ensure hint button is visible only in spelling mode
+                els.hintBtn.classList.remove('hidden');
+            } else { // Multiple Choice
+                els.spellingContainer.classList.add('hidden');
+                els.mcContainer.classList.remove('hidden');
+                // Hide hint button in MC mode
+                els.hintBtn.classList.add('hidden');
+
+                renderMultipleChoice(currentItem);
             }
 
-            els.messageArea.innerHTML = `<span class="text-green-600 font-bold">¡Correcto!</span>`;
-            
             updateStats();
         }
 
-        function handleIncorrect(correctAnswer) {
-            streak = 0;
-            
+        function renderMultipleChoice(currentItem) {
+            const options = generateMultipleChoiceOptions(currentItem);
+            els.mcContainer.innerHTML = options.map((option, index) => `
+                <button data-answer="${option}" onclick="selectMultipleChoice(this, '${option}')"
+                    class="mc-option w-full bg-white border-2 border-slate-200 text-slate-800 text-lg font-medium rounded-xl p-4 text-center focus:outline-none transition-all">
+                    ${option}
+                </button>
+            `).join('');
+        }
+        
+        let selectedMCOption = null;
+
+        function selectMultipleChoice(button, selectedAnswer) {
+            if (isAnswered) return;
+
+            // Clear previous selection highlight
+            document.querySelectorAll('.mc-option').forEach(btn => {
+                btn.classList.remove('ring-4', 'ring-indigo-300', 'shadow-inner');
+            });
+
+            // Highlight current selection
+            button.classList.add('ring-4', 'ring-indigo-300', 'shadow-inner');
+            selectedMCOption = selectedAnswer;
+        }
+
+        function checkAnswer() {
+            if (isAnswered) return;
+
+            let isCorrect = false;
+            let userAnswer = '';
+            let correctAnswerString = '';
+            const currentItem = currentQueue[currentIndex];
+
             if (quizMode === 'spelling') {
-                els.input.classList.remove('border-slate-200', 'text-slate-800');
-                els.input.classList.add('border-red-500', 'text-red-600');
-                els.feedbackIcon.innerHTML = '<i class="fas fa-times-circle text-red-500"></i>';
-                els.feedbackIcon.classList.remove('hidden');
+                userAnswer = els.input.value;
+                const normalizedUserAnswer = normalizeText(userAnswer);
+                const correctAnswers = currentItem.es;
+                
+                isCorrect = correctAnswers.some(ans => normalizeText(ans) === normalizedUserAnswer);
+                correctAnswerString = correctAnswers.join(' / ');
+                
+                // Set the focus back on the input for easy correction
+                els.input.focus();
+
+            } else { // Multiple Choice
+                if (!selectedMCOption) {
+                    alertUser('Please select an option first.', 'text-red-500');
+                    return;
+                }
+                userAnswer = selectedMCOption;
+                const correctAnswers = currentItem.es;
+                
+                isCorrect = correctAnswers.some(ans => normalizeText(ans) === normalizeText(userAnswer));
+                correctAnswerString = correctAnswers.join(' / ');
+
+                // Show feedback on buttons
+                document.querySelectorAll('.mc-option').forEach(btn => {
+                    const optionAnswer = btn.getAttribute('data-answer');
+                    if (correctAnswers.some(ans => normalizeText(ans) === normalizeText(optionAnswer))) {
+                        btn.classList.add('correct');
+                    }
+                    if (normalizeText(optionAnswer) === normalizeText(userAnswer) && !isCorrect) {
+                        btn.classList.add('incorrect');
+                    }
+                    btn.disabled = true; // Disable all buttons
+                });
+
+                // Reset selected option state for next question
+                selectedMCOption = null; 
             }
 
-            els.messageArea.innerHTML = `
-                <span class="text-red-500 font-bold block text-sm">Incorrect</span>
-                <span class="text-slate-600 text-sm">Answer: <strong class="text-indigo-600 text-lg">${correctAnswer}</strong></span>
-            `;
+            // --- Common Feedback Logic ---
+            isAnswered = true;
+            els.submitBtn.classList.add('hidden');
+            els.nextBtn.classList.remove('hidden');
+
+            if (isCorrect) {
+                score++;
+                streak++;
+                els.messageArea.className = 'h-16 mt-4 flex items-center justify-center text-center font-medium text-teal-600 bg-teal-50 rounded-lg fade-in';
+                els.messageArea.innerHTML = `¡Correcto! <i class="fas fa-check-circle ml-2"></i>`;
+                els.feedbackIcon.innerHTML = `<i class="fas fa-check-circle text-teal-500"></i>`;
+                els.feedbackIcon.classList.remove('hidden');
+            } else {
+                streak = 0;
+                els.messageArea.className = 'h-16 mt-4 flex items-center justify-center text-center font-medium text-red-600 bg-red-50 rounded-lg fade-in';
+                els.messageArea.innerHTML = `¡Incorrecto! La respuesta correcta es: <span class="font-bold text-indigo-600">${correctAnswerString}</span>`;
+                els.feedbackIcon.innerHTML = `<i class="fas fa-times-circle text-red-500"></i>`;
+                els.feedbackIcon.classList.remove('hidden');
+                shakeInput();
+            }
 
             updateStats();
         }
 
         function nextQuestion() {
             currentIndex++;
-            if (currentIndex < currentQueue.length) {
-                loadQuestion();
-            } else {
-                endGame();
-            }
+            loadQuestion();
         }
 
-        function endGame() {
+        function showResultScreen() {
             hideAllScreens();
+            screens.header.classList.add('hidden');
             screens.result.classList.remove('hidden');
+            screens.result.classList.add('flex');
 
-            const percentage = Math.round((score / currentQueue.length) * 100);
+            const totalQuestions = currentQueue.length;
+            const accuracy = totalQuestions > 0 ? ((score / totalQuestions) * 100).toFixed(0) : 0;
             
-            els.finalScore.textContent = `${score} / ${currentQueue.length}`;
-            els.finalAccuracy.textContent = `${percentage}%`;
+            els.finalScore.textContent = `${score}/${totalQuestions}`;
+            els.finalAccuracy.textContent = `${accuracy}%`;
 
-            if (percentage === 100) {
-                els.resultEmoji.textContent = "🏆";
-                els.resultEmoji.classList.add('bounce');
-            } else if (percentage >= 80) {
-                els.resultEmoji.textContent = "🎉";
-            } else if (percentage >= 50) {
-                els.resultEmoji.textContent = "👍";
+            if (accuracy >= 90) {
+                els.resultEmoji.textContent = '🌟';
+            } else if (accuracy >= 70) {
+                els.resultEmoji.textContent = '✅';
             } else {
-                els.resultEmoji.textContent = "📚";
+                els.resultEmoji.textContent = '👍';
             }
-        }
-        
-        // --- Accent Helper Function ---
-        function addChar(char) {
-            const input = els.input;
-            if (input.disabled || quizMode !== 'spelling') return;
-            
-            const start = input.selectionStart;
-            const end = input.selectionEnd;
-            const value = input.value;
-            
-            input.value = value.substring(0, start) + char + value.substring(end);
-            input.focus();
-            input.selectionEnd = start + char.length; 
         }
 
         // --- Study List Logic ---
-        
         function renderVocabList() {
-            const container = els.vocabListContainer;
-            container.innerHTML = ''; // Clear existing
+            els.vocabListContainer.innerHTML = Object.entries(groupedVocab).map(([category, items]) => {
+                const listItems = items.map(item => `
+                    <div class="flex justify-between items-start py-3 border-b border-slate-100">
+                        <span class="text-slate-700 font-medium w-1/2 pr-2">${item.en}</span>
+                        <span class="text-indigo-600 font-semibold w-1/2 text-right">${item.es.join(' / ')}</span>
+                    </div>
+                `).join('');
 
-            for (const [category, items] of Object.entries(groupedVocab)) {
-                // Section Header
-                const section = document.createElement('div');
-                section.className = "mb-6";
-                section.innerHTML = `
-                    <h3 class="font-bold text-indigo-600 border-b border-indigo-100 pb-2 mb-3 sticky top-0 bg-white z-10">${category}</h3>
-                    <div class="grid grid-cols-1 gap-2">
-                        ${items.map(item => `
-                            <div class="flex justify-between items-start text-sm group hover:bg-slate-50 p-2 rounded transition-colors">
-                                <span class="text-slate-600 w-1/2 pr-2">${item.en}</span>
-                                <span class="font-medium text-slate-800 w-1/2 text-right">${item.es[0]}</span>
-                            </div>
-                        `).join('')}
+                return `
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                        <h3 class="text-lg font-bold text-slate-800 mb-2 border-b-2 border-indigo-200 pb-1">${category}</h3>
+                        ${listItems}
                     </div>
                 `;
-                container.appendChild(section);
-            }
+            }).join('');
         }
 
-        // --- Event Listeners ---
-        
-        // Handle Enter key for spelling mode submission
-        els.input.addEventListener("keypress", function(event) {
-            if (event.key === "Enter" && quizMode === 'spelling') {
-                event.preventDefault();
-                checkAnswer();
+        // --- Accent Helper Logic ---
+        function addChar(char) {
+            if (quizMode === 'spelling' && !isAnswered) {
+                const input = els.input;
+                const start = input.selectionStart;
+                const end = input.selectionEnd;
+
+                // Insert character at cursor position
+                input.value = input.value.substring(0, start) + char + input.value.substring(end);
+                
+                // Move cursor past the inserted character
+                input.focus();
+                input.selectionStart = input.selectionEnd = start + 1;
             }
-        });
-        
-        // Handle Enter key for next question (after answering)
-        document.addEventListener("keydown", function(event) {
-            // Check if game screen is visible and answer is checked
-            if (event.key === "Enter" && isAnswered && !screens.game.classList.contains('hidden')) {
-                event.preventDefault();
-                nextQuestion();
-            }
-        });
+        }
 
     </script>
 </body>
