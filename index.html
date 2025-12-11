@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spanish Vocab Master: Ciudades</title>
+    <title>Spanish Vocab Master</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -64,10 +64,10 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col items-center justify-center p-4">
+<body class="bg-slate-50 text-slate-800 h-screen flex flex-col items-center justify-center p-4">
 
     <!-- Main Container -->
-    <div class="w-full max-w-lg bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100 relative h-[600px] flex flex-col">
+    <div class="w-full max-w-lg bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100 relative flex flex-col h-full max-h-[95vh]">
         
         <!-- Header / Progress -->
         <div id="header-section" class="bg-indigo-600 p-4 text-white hidden flex-shrink-0">
@@ -76,8 +76,8 @@
                 <button onclick="handleGameScreenBack()" class="p-1 rounded-full hover:bg-indigo-700 transition-colors">
                     <i class="fas fa-arrow-left text-lg"></i>
                 </button>
-                <span class="font-bold text-lg flex-grow text-center">
-                    <i class="fas fa-city mr-2"></i>Ciudades Quiz
+                <span class="font-bold text-lg flex-grow text-center" id="header-title">
+                    <i class="fas fa-layer-group mr-2"></i>Vocab Quiz
                 </span>
                 <div class="flex items-center space-x-4">
                     <span class="bg-indigo-500 px-3 py-1 rounded-full text-sm font-medium">
@@ -93,15 +93,27 @@
         </div>
 
         <!-- Screens -->
-        <div class="flex-grow flex flex-col relative overflow-hidden">
+        <div class="flex-grow flex flex-col relative overflow-hidden min-h-0">
             
-            <!-- 1. Start Screen (Simplified Menu) -->
+            <!-- 1. Start Screen (Unit Selection) -->
             <div id="start-screen" class="absolute inset-0 p-8 flex flex-col justify-center items-center bg-white z-20 fade-in overflow-y-auto">
                 <div class="bg-indigo-100 p-6 rounded-full mb-6 text-indigo-600 flex-shrink-0">
-                    <i class="fas fa-building text-5xl"></i>
+                    <i class="fas fa-language text-5xl"></i>
                 </div>
-                <h1 class="text-3xl font-bold mb-2 text-slate-800 flex-shrink-0">Unit: Ciudades</h1>
-                <p class="text-slate-500 mb-6 text-center text-sm flex-shrink-0">Vocabulary, adjectives, and expressions for describing cities.</p>
+                <h1 class="text-3xl font-bold mb-2 text-slate-800 flex-shrink-0">Spanish Master</h1>
+                
+                <!-- Unit Selector -->
+                <div class="w-full max-w-xs mb-6">
+                    <label class="block text-slate-500 text-xs font-bold uppercase tracking-wider mb-2 text-center">Select Unit</label>
+                    <div class="relative">
+                        <select id="unit-select" onchange="changeUnit()" class="block appearance-none w-full bg-slate-50 border border-slate-200 text-slate-700 py-3 px-4 pr-8 rounded-xl leading-tight focus:outline-none focus:bg-white focus:border-indigo-500 font-semibold text-center shadow-sm">
+                            <!-- Options populated by JS -->
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-700">
+                            <i class="fas fa-chevron-down text-xs mr-2"></i>
+                        </div>
+                    </div>
+                </div>
                 
                 <!-- Action Buttons -->
                 <div class="space-y-3 w-full max-w-xs flex-shrink-0">
@@ -109,7 +121,6 @@
                         Quick Start (10 Questions)
                     </button>
                     
-                    <!-- Button to access Configuration Screen -->
                     <button onclick="showConfigScreen()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 px-6 rounded-xl transition-colors flex justify-center items-center">
                         <i class="fas fa-sliders-h mr-2"></i> Configure & Start
                     </button>
@@ -120,7 +131,7 @@
                 </div>
             </div>
 
-            <!-- 2. Configuration Screen (Mode, Category, & Length Selection) -->
+            <!-- 2. Configuration Screen -->
             <div id="config-screen" class="absolute inset-0 flex flex-col bg-white z-20 hidden fade-in">
                 <div class="bg-indigo-600 text-white p-4 flex justify-between items-center flex-shrink-0">
                     <button onclick="showStartScreen()" class="text-white hover:text-indigo-200 font-medium">
@@ -131,7 +142,7 @@
                 </div>
                 <div class="p-6 flex flex-col flex-grow overflow-y-auto">
                     
-                    <!-- QUIZ LENGTH SELECTION -->
+                    <!-- QUIZ LENGTH -->
                     <div class="w-full mb-6 p-4 bg-slate-50 rounded-xl border border-slate-200 flex-shrink-0">
                         <h3 class="text-sm font-bold text-slate-600 mb-3 uppercase tracking-wider text-center">Quiz Length</h3>
                         <select id="quiz-length-select" class="w-full bg-white border border-slate-300 rounded-lg p-2 text-slate-700 focus:ring-indigo-500 focus:border-indigo-500">
@@ -160,7 +171,7 @@
                     <div class="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 flex-grow flex flex-col min-h-[150px]">
                         <h3 class="text-sm font-bold text-slate-600 mb-3 uppercase tracking-wider flex-shrink-0">Select Categories</h3>
                         <div id="category-selector" class="grid grid-cols-2 gap-y-3 gap-x-4 text-sm flex-grow overflow-y-auto pr-2">
-                            <!-- Checkboxes will be injected here by JS -->
+                            <!-- Checkboxes injected by JS -->
                         </div>
                         <div class="mt-4 pt-3 border-t border-slate-200 flex-shrink-0">
                             <label class="flex items-center space-x-2 text-indigo-600 cursor-pointer">
@@ -171,14 +182,12 @@
                     </div>
                 </div>
                 
-                <!-- Final Action Button for Config Screen -->
                 <div class="p-6 pt-0 flex-shrink-0">
                     <button onclick="applyConfigAndStartGame()" class="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-teal-200 transition-all transform active:scale-95">
                         Start Quiz <i class="fas fa-arrow-right ml-2"></i>
                     </button>
                 </div>
             </div>
-
 
             <!-- 3. Study List Screen -->
             <div id="list-screen" class="absolute inset-0 flex flex-col bg-white z-20 hidden fade-in">
@@ -194,21 +203,18 @@
             </div>
 
             <!-- 4. Game Screen -->
-            <div id="game-screen" class="hidden flex-col h-full justify-between fade-in p-8">
+            <div id="game-screen" class="hidden flex-col h-full overflow-hidden fade-in p-6">
                 
-                <div class="text-center mt-4 flex-shrink-0">
+                <div class="text-center mt-2 flex-shrink-0 min-h-[5rem]">
                     <p class="text-sm text-slate-400 font-medium uppercase tracking-wider mb-2">Translate to Spanish</p>
-                    <h2 id="question-word" class="text-2xl font-bold text-indigo-900 mb-6 leading-tight">Hello</h2>
+                    <h2 id="question-word" class="text-2xl font-bold text-indigo-900 leading-tight min-h-[3rem] flex items-center justify-center">Hello</h2>
                 </div>
 
-                <!-- Dynamic Answer Area -->
-                <div id="answer-area" class="w-full flex-grow flex flex-col justify-center mb-4">
+                <div id="answer-area" class="w-full flex-grow flex flex-col justify-center mb-4 overflow-y-auto min-h-0">
                     
                     <!-- Spelling Mode Container -->
-                    <div id="spelling-mode-container">
-                         <!-- Hint Button -->
+                    <div id="spelling-mode-container" class="flex flex-col justify-center">
                         <div class="flex justify-center mb-4">
-                            <!-- Hint button is now always enabled -->
                             <button id="hint-btn" onclick="showHint()" class="bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-full text-sm transition-colors shadow-md shadow-orange-200 flex items-center">
                                 <i class="fas fa-lightbulb mr-2"></i> Hint
                             </button>
@@ -216,14 +222,13 @@
 
                         <div class="relative">
                             <input type="text" id="answer-input" 
+                                onkeyup="handleEnter(event)"
                                 class="w-full bg-slate-50 border-2 border-slate-200 text-slate-800 text-lg font-medium rounded-xl p-4 text-center focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all placeholder-slate-300"
                                 placeholder="Type translation..." autocomplete="off">
                             
-                            <!-- Feedback Icons -->
                             <div id="feedback-icon" class="hidden absolute right-4 top-1/2 transform -translate-y-1/2 text-xl"></div>
                         </div>
 
-                        <!-- Accent Helper Keys -->
                         <div class="flex justify-center flex-wrap gap-2 mt-4" id="accent-keys">
                             <button onclick="addChar('á')" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 px-3 rounded-lg transition-colors border border-slate-200">á</button>
                             <button onclick="addChar('é')" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 px-3 rounded-lg transition-colors border border-slate-200">é</button>
@@ -233,18 +238,14 @@
                             <button onclick="addChar('ñ')" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 px-3 rounded-lg transition-colors border border-slate-200">ñ</button>
                         </div>
 
-                        <!-- Message Area -->
                         <div id="message-area" class="h-16 mt-4 flex items-center justify-center text-center font-medium"></div>
                     </div>
 
                     <!-- Multiple Choice Mode Container -->
-                    <div id="mc-mode-container" class="hidden flex flex-col space-y-3 pt-4 overflow-y-auto max-h-full">
-                        <!-- Multiple choice options will be injected here -->
-                    </div>
+                    <div id="mc-mode-container" class="hidden flex flex-col space-y-3 pt-4"></div>
                 </div>
                 
-                <!-- Actions -->
-                <div class="w-full mt-auto flex-shrink-0">
+                <div class="w-full mt-auto flex-shrink-0 pb-2">
                     <div class="mt-2" id="action-buttons-container">
                         <button id="submit-btn" onclick="checkAnswer()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-200 transition-all transform active:scale-95">
                             Check Answer
@@ -287,126 +288,303 @@
     </div>
 
     <!-- Footer -->
-    <div class="mt-8 text-center text-slate-400 text-sm">
-        <p>Tip: Punctuation is ignored. Hints are unlimited in spelling mode. Adjectives accept masculine/feminine forms.</p>
+    <div class="mt-4 text-center text-slate-400 text-sm">
+        <p>Tip: In spelling mode, **Hint** reveals letter by letter. Press **Enter** to submit.</p>
     </div>
 
     <script>
-        // Structured Data for Categories
-        // Adjectives now include both masculine and feminine forms for flexibility.
-        const groupedVocab = {
-            "Adjetivos: Positivos": [
-                // preciosa (f) / precioso (m)
-                { en: "beautiful / lovely", es: ["preciosa", "precioso"] }, 
-                // cuidada (f) / cuidado (m)
-                { en: "well looked-after", es: ["cuidada", "cuidado"] }, 
-                // limpia (f) / limpio (m)
-                { en: "clean", es: ["limpia", "limpio"] }, 
-                { en: "grand / full of monuments", es: ["monumental"] }, // Invariant
-                // tranquila (f) / tranquilo (m)
-                { en: "calm / peaceful", es: ["tranquila", "tranquilo"] }, 
-                { en: "traditional", es: ["tradicional"] }, // Invariant
-                // artística (f) / artístico (m)
-                { en: "artistic", es: ["artística", "artístico"] }, 
-                // histórica (f) / histórico (m)
-                { en: "historic", es: ["histórica", "histórico"] }, 
-                // bien conservada (f) / bien conservado (m)
-                { en: "well preserved", es: ["bien conservada", "bien conservado", "conservada", "conservado"] }, 
-                { en: "cosmopolitan / international", es: ["cosmopolita"] }, // Invariant
-                // viva (f) / vivo (m)
-                { en: "lively / vibrant", es: ["viva", "vivo", "vibrante"] }, // 'vibrante' is invariant
-                { en: "special", es: ["especial"] }, // Invariant
-                // bien organizada (f) / bien organizado (m)
-                { en: "well organised", es: ["bien organizada", "bien organizado", "organizada", "organizado"] }, 
-                // abierta (f) / abierto (m)
-                { en: "open-minded / open", es: ["abierta", "abierto"] } 
-            ],
-            "Adjetivos: Negativos": [
-                { en: "horrible", es: ["horrible"] }, // Invariant
-                // desordenada (f) / desordenado (m) - already included both -organizada/-organizado variants
-                { en: "messy / disorganised", es: ["desordenada", "desordenado", "desorganizada", "desorganizado"] }, 
-                // sucia (f) / sucio (m)
-                { en: "dirty", es: ["sucia", "sucio"] }, 
-                // ruidosa (f) / ruidoso (m)
-                { en: "noisy", es: ["ruidosa", "ruidoso"] }, 
-                // aburrida (f) / aburrido (m)
-                { en: "boring", es: ["aburrida", "aburrido"] }, 
-                // contaminada (f) / contaminado (m)
-                { en: "polluted", es: ["contaminada", "contaminado"] }, 
-                { en: "run-down / decaying", es: ["decadente"] }, // Invariant
-                // mal conservada (f) / mal conservado (m)
-                { en: "badly preserved", es: ["mal conservada", "mal conservado"] }, 
-                // peligrosa (f) / peligroso (m)
-                { en: "dangerous", es: ["peligrosa", "peligroso"] }, 
-                // cerrada (f) / cerrado (m)
-                { en: "closed / narrow-minded", es: ["cerrada", "cerrado"] } 
-            ],
-            "Adjetivos: Neutrales": [
-                // humana (f) / humano (m)
-                { en: "human / people-focused", es: ["humana", "humano"] }, 
-                { en: "cheerful / lively", es: ["alegre"] }, // Invariant
-                // antigua (f) / antiguo (m)
-                { en: "old / traditional", es: ["antigua", "antiguo"] }, 
-                // urbana (f) / urbano (m)
-                { en: "urban", es: ["urbana", "urbano"] } 
-            ],
-            "Vocabulario Clave": [
-                { en: "traffic", es: ["el tráfico", "tráfico"] },
-                { en: "overpopulation", es: ["la superpoblación", "superpoblación"] },
-                { en: "coexistence", es: ["la convivencia", "convivencia"] },
-                { en: "chaos", es: ["el caos", "caos"] },
-                { en: "pollution", es: ["la contaminación", "contaminación"] },
-                { en: "atmosphere / vibe", es: ["el ambiente", "ambiente"] },
-                { en: "aggressive side", es: ["la parte agresiva"] },
-                { en: "awake city / always active", es: ["ciudad despierta"] },
-                { en: "never sleeps", es: ["no duerme"] },
-                { en: "to connect with others", es: ["relacionarse"] },
-                { en: "to have a few glasses of wine", es: ["tomar unos vinos"] },
-                { en: "the bar on the corner", es: ["el bar de la esquina"] },
-                { en: "neighbourhood", es: ["barrio", "el barrio"] },
-                // acogedora (f) / acogedor (m)
-                { en: "welcoming", es: ["acogedora", "acogedor"] }
-            ],
-            "Expresiones: Opiniones": [
-                { en: "In my opinion...", es: ["en mi opinión"] },
-                { en: "I think that...", es: ["creo que"] },
-                { en: "It seems to me that...", es: ["me parece que"] },
-                { en: "From my point of view...", es: ["desde mi punto de vista"] },
-                { en: "I agree", es: ["estoy de acuerdo"] },
-                { en: "You're right", es: ["tienes razón"] },
-                { en: "I share your opinion", es: ["comparto tu opinión"] },
-                { en: "I disagree", es: ["no estoy de acuerdo"] },
-                { en: "I don't see it that way", es: ["no lo veo así"] },
-                { en: "I think you're mistaken", es: ["creo que te equivocas"] }
-            ],
-            "Expresiones: Contraste": [
-                { en: "On one hand...", es: ["por un lado", "por una parte"] },
-                { en: "On the other hand...", es: ["por otro lado", "por otra parte"] },
-                { en: "Despite...", es: ["a pesar de"] },
-                { en: "Although / even though...", es: ["aunque"] },
-                { en: "However / nevertheless...", es: ["sin embargo"] }
-            ],
-            "Frases Útiles": [
-                { en: "What I like most is...", es: ["lo que más me gusta es"] },
-                { en: "It's a welcoming city", es: ["es una ciudad acogedora"] },
-                { en: "It has a warm atmosphere", es: ["tiene un ambiente muy cálido"] },
-                { en: "It's very cosmopolitan", es: ["es muy cosmopolita"] },
-                { en: "The worst thing is...", es: ["lo peor de la ciudad es", "lo peor es"] },
-                { en: "It's too noisy", es: ["es demasiado ruidosa", "es demasiado ruidoso"] }, // Updated
-                { en: "There are too many people", es: ["hay demasiada gente"] },
-                { en: "The traffic is unbearable", es: ["el tráfico es insoportable"] },
-                { en: "It has good and bad things", es: ["tiene cosas buenas y malas"] },
-                { en: "It's a city that never sleeps", es: ["es una ciudad que nunca duerme"] }
-            ],
-            "Estructuras": [
-                { en: "The good thing is that...", es: ["lo bueno es que"] },
-                { en: "The bad thing is that...", es: ["lo malo es que"] },
-                { en: "It's a city where...", es: ["es una ciudad donde"] },
-                { en: "It's a place in which...", es: ["es un lugar en el que"] }
-            ]
+        // --- Multi-Unit Data Structure ---
+        const allVocabData = {
+            "Ciudades": {
+                "Adjetivos: Positivos": [
+                    { en: "beautiful / lovely", es: ["preciosa", "precioso"] }, 
+                    { en: "well looked-after", es: ["cuidada", "cuidado"] }, 
+                    { en: "clean", es: ["limpia", "limpio"] }, 
+                    { en: "grand / full of monuments", es: ["monumental"] },
+                    { en: "calm / peaceful", es: ["tranquila", "tranquilo"] }, 
+                    { en: "traditional", es: ["tradicional"] },
+                    { en: "artistic", es: ["artística", "artístico"] }, 
+                    { en: "historic", es: ["histórica", "histórico"] }, 
+                    { en: "well preserved", es: ["bien conservada", "bien conservado", "conservada", "conservado"] }, 
+                    { en: "cosmopolitan / international", es: ["cosmopolita"] },
+                    { en: "lively / vibrant", es: ["viva", "vivo", "vibrante"] },
+                    { en: "special", es: ["especial"] },
+                    { en: "well organised", es: ["bien organizada", "bien organizado", "organizada", "organizado"] }, 
+                    { en: "open-minded / open", es: ["abierta", "abierto"] } 
+                ],
+                "Adjetivos: Negativos": [
+                    { en: "horrible", es: ["horrible"] },
+                    { en: "messy / disorganised", es: ["desordenada", "desordenado", "desorganizada", "desorganizado"] }, 
+                    { en: "dirty", es: ["sucia", "sucio"] }, 
+                    { en: "noisy", es: ["ruidosa", "ruidoso"] }, 
+                    { en: "boring", es: ["aburrida", "aburrido"] }, 
+                    { en: "polluted", es: ["contaminada", "contaminado"] }, 
+                    { en: "run-down / decaying", es: ["decadente"] },
+                    { en: "badly preserved", es: ["mal conservada", "mal conservado"] }, 
+                    { en: "dangerous", es: ["peligrosa", "peligroso"] }, 
+                    { en: "closed / narrow-minded", es: ["cerrada", "cerrado"] } 
+                ],
+                "Adjetivos: Neutrales": [
+                    { en: "human / people-focused", es: ["humana", "humano"] }, 
+                    { en: "cheerful / lively", es: ["alegre"] },
+                    { en: "old / traditional", es: ["antigua", "antiguo"] }, 
+                    { en: "urban", es: ["urbana", "urbano"] } 
+                ],
+                "Vocabulario Clave": [
+                    { en: "traffic", es: ["el tráfico", "tráfico"] },
+                    { en: "overpopulation", es: ["la superpoblación", "superpoblación"] },
+                    { en: "coexistence", es: ["la convivencia", "convivencia"] },
+                    { en: "chaos", es: ["el caos", "caos"] },
+                    { en: "pollution", es: ["la contaminación", "contaminación"] },
+                    { en: "atmosphere / vibe", es: ["el ambiente", "ambiente"] },
+                    { en: "aggressive side", es: ["la parte agresiva"] },
+                    { en: "awake city / always active", es: ["ciudad despierta"] },
+                    { en: "never sleeps", es: ["no duerme"] },
+                    { en: "to connect with others", es: ["relacionarse"] },
+                    { en: "to have a few glasses of wine", es: ["tomar unos vinos"] },
+                    { en: "the bar on the corner", es: ["el bar de la esquina"] },
+                    { en: "neighbourhood", es: ["barrio", "el barrio"] },
+                    { en: "welcoming", es: ["acogedora", "acogedor"] }
+                ],
+                "Expresiones: Opiniones": [
+                    { en: "In my opinion...", es: ["en mi opinión"] },
+                    { en: "I think that...", es: ["creo que"] },
+                    { en: "It seems to me that...", es: ["me parece que"] },
+                    { en: "From my point of view...", es: ["desde mi punto de vista"] },
+                    { en: "I agree", es: ["estoy de acuerdo"] },
+                    { en: "You're right", es: ["tienes razón"] },
+                    { en: "I share your opinion", es: ["comparto tu opinión"] },
+                    { en: "I disagree", es: ["no estoy de acuerdo"] },
+                    { en: "I don't see it that way", es: ["no lo veo así"] },
+                    { en: "I think you're mistaken", es: ["creo que te equivocas"] }
+                ],
+                "Expresiones: Contraste": [
+                    { en: "On one hand...", es: ["por un lado", "por una parte"] },
+                    { en: "On the other hand...", es: ["por otro lado", "por otra parte"] },
+                    { en: "Despite...", es: ["a pesar de"] },
+                    { en: "Although / even though...", es: ["aunque"] },
+                    { en: "However / nevertheless...", es: ["sin embargo"] }
+                ],
+                "Frases Útiles": [
+                    { en: "What I like most is...", es: ["lo que más me gusta es"] },
+                    { en: "It's a welcoming city", es: ["es una ciudad acogedora"] },
+                    { en: "It has a warm atmosphere", es: ["tiene un ambiente muy cálido"] },
+                    { en: "It's very cosmopolitan", es: ["es muy cosmopolita"] },
+                    { en: "The worst thing is...", es: ["lo peor de la ciudad es", "lo peor es"] },
+                    { en: "It's too noisy", es: ["es demasiado ruidosa", "es demasiado ruidoso"] },
+                    { en: "There are too many people", es: ["hay demasiada gente"] },
+                    { en: "The traffic is unbearable", es: ["el tráfico es insoportable"] },
+                    { en: "It has good and bad things", es: ["tiene cosas buenas y malas"] },
+                    { en: "It's a city that never sleeps", es: ["es una ciudad que nunca duerme"] }
+                ],
+                "Estructuras": [
+                    { en: "The good thing is that...", es: ["lo bueno es que"] },
+                    { en: "The bad thing is that...", es: ["lo malo es que"] },
+                    { en: "It's a city where...", es: ["es una ciudad donde"] },
+                    { en: "It's a place in which...", es: ["es un lugar en el que"] }
+                ]
+            },
+            "Tecnología": {
+                "Dispositivos": [
+                    { en: "computer", es: ["el ordenador", "la computadora"] },
+                    { en: "laptop", es: ["el portátil"] },
+                    { en: "tablet", es: ["la tableta"] },
+                    { en: "mobile phone", es: ["el móvil", "el celular"] },
+                    { en: "screen", es: ["la pantalla"] },
+                    { en: "keyboard", es: ["el teclado"] },
+                    { en: "mouse", es: ["el ratón"] },
+                    { en: "headphones", es: ["los auriculares"] },
+                    { en: "camera / webcam", es: ["la cámara", "la webcam"] },
+                    { en: "microphone", es: ["el micrófono"] },
+                    { en: "plug", es: ["el enchufe"] },
+                    { en: "charger", es: ["el cargador"] },
+                    { en: "battery", es: ["la batería"] },
+                    { en: "hard drive", es: ["el disco duro"] },
+                    { en: "USB stick", es: ["la memoria USB"] },
+                    { en: "cable", es: ["el cable"] }
+                ],
+                "Conectividad": [
+                    { en: "wifi / network", es: ["el wifi", "la red"] },
+                    { en: "the cloud", es: ["la nube"] },
+                    { en: "website", es: ["la página web", "el sitio web"] },
+                    { en: "email", es: ["el correo electrónico"] },
+                    { en: "app", es: ["la aplicación", "la app"] },
+                    { en: "password", es: ["la contraseña"] },
+                    { en: "link", es: ["el enlace"] }
+                ],
+                "Acciones": [
+                    { en: "to browse the internet", es: ["navegar por internet"] },
+                    { en: "to click", es: ["hacer clic", "pinchar"] },
+                    { en: "to download", es: ["descargar"] },
+                    { en: "to upload", es: ["subir"] },
+                    { en: "to share", es: ["compartir"] },
+                    { en: "to save", es: ["guardar"] },
+                    { en: "to delete", es: ["borrar"] },
+                    { en: "to log in", es: ["iniciar sesión"] },
+                    { en: "to attach", es: ["adjuntar"] }
+                ],
+                "Frases Útiles": [
+                    { en: "I'm online", es: ["estoy en línea"] },
+                    { en: "I need to log in", es: ["tengo que iniciar sesión"] },
+                    { en: "Close the screen", es: ["cierra la pantalla"] },
+                    { en: "Turn on the computer", es: ["enciende el ordenador"] },
+                    { en: "Save and close the file", es: ["guarda y cierra el archivo"] },
+                    { en: "Attach the file and send it", es: ["adjunta el documento y envíalo"] },
+                    { en: "Download the app", es: ["descarga la aplicación"] },
+                    { en: "I forgot my password", es: ["olvidé mi contraseña"] },
+                    { en: "My computer is slow", es: ["mi ordenador va lento"] },
+                    { en: "There's no connection", es: ["no hay conexión"] }
+                ]
+            },
+            "Verbos con Preposición": {
+                "Verbos con A": [
+                    { en: "to approach", es: ["acercarse a"] },
+                    { en: "to get used to", es: ["acostumbrarse a"] },
+                    { en: "to encourage to", es: ["animar a"] },
+                    { en: "to learn to", es: ["aprender a"] },
+                    { en: "to help to", es: ["ayudar a"] },
+                    { en: "to begin to", es: ["empezar a", "comenzar a"] },
+                    { en: "to invite to", es: ["invitar a"] },
+                    { en: "to play (a game)", es: ["jugar a"] },
+                    { en: "to force to", es: ["obligar a"] },
+                    { en: "to do again", es: ["volver a"] },
+                    { en: "to ask (someone)", es: ["preguntar a"] },
+                    { en: "to recommend to", es: ["recomendar a"] }
+                ],
+                "Verbos con DE": [
+                    { en: "to have just (done something)", es: ["acabar de"] },
+                    { en: "to remember", es: ["acordarse de"] },
+                    { en: "to be glad about", es: ["alegrarse de"] },
+                    { en: "to regret", es: ["arrepentirse de"] },
+                    { en: "to get tired of", es: ["cansarse de"] },
+                    { en: "to stop doing", es: ["dejar de"] },
+                    { en: "to depend on", es: ["depender de"] },
+                    { en: "to say goodbye to", es: ["despedirse de"] },
+                    { en: "to fall in love with", es: ["enamorarse de"] },
+                    { en: "to forget", es: ["olvidarse de"] },
+                    { en: "to try to", es: ["tratar de"] },
+                    { en: "to ask about (someone)", es: ["preguntar por"] }
+                ],
+                "Verbos con EN": [
+                    { en: "to consist of", es: ["consistir en"] },
+                    { en: "to trust in", es: ["confiar en"] },
+                    { en: "to insist on", es: ["insistir en"] },
+                    { en: "to think about", es: ["pensar en"] },
+                    { en: "to agree to", es: ["quedar en"] }
+                ],
+                "Verbos con CON": [
+                    { en: "to marry", es: ["casarse con"] },
+                    { en: "to rely on", es: ["contar con"] },
+                    { en: "to dream about", es: ["soñar con"] },
+                    { en: "to trip over", es: ["tropezar con"] },
+                    { en: "to meet up with", es: ["quedar con"] }
+                ],
+                "Verbos con POR/PARA": [
+                    { en: "to worry about", es: ["preocuparse por"] },
+                    { en: "to be interested in", es: ["interesarse por"] },
+                    { en: "to protest about", es: ["protestar por"] },
+                    { en: "to be used for", es: ["servir para"] },
+                    { en: "to work for", es: ["trabajar para"] }
+                ]
+            },
+            "Dar Consejos": {
+                "Imperativo": [
+                    { en: "Do exercise", es: ["haz deporte"] },
+                    { en: "Go swimming", es: ["ve a nadar"] },
+                    { en: "Try to relax", es: ["trata de relajarte"] },
+                    { en: "Don't smoke", es: ["no fumes"] },
+                    { en: "Don't eat animal fats", es: ["no comas grasas animales"] },
+                    { en: "Don't abuse alcohol", es: ["no abuses del alcohol"] }
+                ],
+                "Recomendaciones": [
+                    { en: "I advise you to do exercise", es: ["te aconsejo hacer deporte"] },
+                    { en: "I recommend you study more", es: ["te recomiendo estudiar más"] },
+                    { en: "I advise you to do exercise (subj)", es: ["te aconsejo que hagas deporte"] },
+                    { en: "I recommend that you work less", es: ["te recomiendo que trabajes menos"] },
+                    { en: "I advise you to go to the doctor", es: ["te aconsejo que vayas al médico"] }
+                ],
+                "Condicional": [
+                    { en: "You should go to the doctor", es: ["deberías ir al médico"] },
+                    { en: "You would need to eat less", es: ["tendrías que comer menos"] },
+                    { en: "You could take better care of yourself", es: ["podrías cuidarte más"] }
+                ],
+                "En tu lugar": [
+                    { en: "If I were you, I'd do exercise", es: ["yo en tu lugar haría deporte"] },
+                    { en: "If I were you, I would stop smoking", es: ["yo que tú dejaría de fumar"] },
+                    { en: "I would go to the doctor", es: ["yo iría al médico"] },
+                    { en: "I would work less", es: ["yo trabajaría menos"] },
+                    { en: "I would go out more", es: ["yo saldría más"] }
+                ]
+            },
+            "Opiniones y Debate": {
+                "Opiniones": [
+                    { en: "In my opinion...", es: ["en mi opinión"] },
+                    { en: "From my point of view...", es: ["desde mi punto de vista"] },
+                    { en: "I think that...", es: ["creo que", "pienso que"] },
+                    { en: "It seems to me that...", es: ["me parece que"] },
+                    { en: "It's true that...", es: ["es cierto que"] },
+                    { en: "It's obvious that...", es: ["es evidente que"] },
+                    { en: "I'm sure that...", es: ["estoy seguro de que"] }
+                ],
+                "Duda (Subjuntivo)": [
+                    { en: "I don't think that...", es: ["no creo que"] },
+                    { en: "I doubt that...", es: ["dudo que"] },
+                    { en: "I'm not sure that...", es: ["no estoy seguro de que"] },
+                    { en: "It's not true that...", es: ["no es cierto que", "no es verdad que"] },
+                    { en: "It's not evident that...", es: ["no es evidente que"] },
+                    { en: "It's possible that...", es: ["es posible que"] },
+                    { en: "It's impossible that...", es: ["es imposible que"] }
+                ],
+                "Acuerdo": [
+                    { en: "Yes, of course", es: ["sí claro"] },
+                    { en: "You're right", es: ["tienes razón"] },
+                    { en: "I think the same as you", es: ["yo pienso lo mismo que tú", "yo pienso igual que tú"] },
+                    { en: "I share your opinion", es: ["comparto tu opinión"] },
+                    { en: "I agree", es: ["estoy de acuerdo"] }
+                ],
+                "Desacuerdo": [
+                    { en: "No way!", es: ["¡qué va!"] },
+                    { en: "You're not right", es: ["no tienes razón"] },
+                    { en: "I don't think the same", es: ["yo no pienso lo mismo"] },
+                    { en: "I don't think so", es: ["a mí me parece que no"] },
+                    { en: "I think not", es: ["yo creo que no"] },
+                    { en: "I disagree", es: ["no estoy de acuerdo"] },
+                    { en: "I don't see it that way", es: ["no lo veo así"] },
+                    { en: "I think you're mistaken", es: ["creo que te equivocas"] }
+                ]
+            },
+            "Transmitir Mensajes": {
+                "Reportar Preguntas": [
+                    { en: "He asked me if I want to come", es: ["me ha preguntado si quiero venir"] },
+                    { en: "They asked me if you can help", es: ["me han preguntado si puedes ayudarles"] },
+                    { en: "They asked me what I'm bringing", es: ["me ha preguntado qué voy a llevar"] },
+                    { en: "He asked me where you live", es: ["me ha preguntado dónde vivís"] },
+                    { en: "He asked me when the party starts", es: ["me ha preguntado cuándo empieza la fiesta"] }
+                ],
+                "Reportar Órdenes": [
+                    { en: "He told me to put on my coat", es: ["me ha dicho que me ponga el abrigo"] },
+                    { en: "He told me not to be late", es: ["me ha dicho que no llegue tarde"] },
+                    { en: "He asked me to call my mother", es: ["me ha pedido que llame a mi madre"] },
+                    { en: "He told me to do the homework", es: ["me ha dicho que haga los deberes"] },
+                    { en: "He told me not to drink so much coffee", es: ["me ha dicho que no beba tanto café"] },
+                    { en: "He recommended that you work less", es: ["me ha recomendado que trabajes menos"] }
+                ],
+                "Favores y Permisos": [
+                    { en: "Can you help me?", es: ["¿me puedes ayudar?"] },
+                    { en: "Could you bring me a coffee?", es: ["¿me podrías traer un café?"] },
+                    { en: "Can you lend me your phone?", es: ["¿me dejas tu móvil?"] },
+                    { en: "Yes, of course", es: ["sí claro", "por supuesto"] },
+                    { en: "Sorry, I can't", es: ["lo siento no puedo"] },
+                    { en: "Not right now", es: ["ahora mismo no"] },
+                    { en: "I'd rather not", es: ["prefiero que no"] }
+                ]
+            }
         };
 
         // State Variables
+        let currentUnitName = "Ciudades"; // Default unit
+        let groupedVocab = allVocabData[currentUnitName]; // Data for current unit
+        
         let currentQueue = [];
         let currentIndex = 0;
         let score = 0;
@@ -414,7 +592,8 @@
         let isAnswered = false;
         let quizMode = 'spelling'; 
         let selectedCategories = Object.keys(groupedVocab); 
-        let quizLength = 10; // Default length
+        let quizLength = 10;
+        let hintLevel = 0; 
 
         // DOM Elements
         const screens = {
@@ -445,8 +624,24 @@
             accentKeys: document.getElementById('accent-keys'),
             hintBtn: document.getElementById('hint-btn'), 
             selectAllCheckbox: null, 
-            quizLengthSelect: document.getElementById('quiz-length-select') 
+            quizLengthSelect: document.getElementById('quiz-length-select'),
+            unitSelect: document.getElementById('unit-select'),
+            headerTitle: document.getElementById('header-title')
         };
+
+        // --- Logic for Unit Selection ---
+        function initUnitSelector() {
+            const units = Object.keys(allVocabData);
+            els.unitSelect.innerHTML = units.map(unit => `<option value="${unit}">${unit}</option>`).join('');
+            els.unitSelect.value = currentUnitName;
+        }
+
+        function changeUnit() {
+            currentUnitName = els.unitSelect.value;
+            groupedVocab = allVocabData[currentUnitName];
+            selectedCategories = Object.keys(groupedVocab); // Reset selection to all
+            renderCategoryCheckboxes(); // Update checkbox list for new unit
+        }
 
         // --- Setup Logic for Category Checkboxes ---
 
@@ -464,7 +659,6 @@
             // Set up "Select All" functionality
             els.selectAllCheckbox = document.getElementById('select-all-categories');
             if (els.selectAllCheckbox) {
-                 // Check if all are selected based on initial state
                  els.selectAllCheckbox.checked = selectedCategories.length === keys.length;
                  els.selectAllCheckbox.addEventListener('change', (e) => {
                     document.querySelectorAll('.category-checkbox').forEach(checkbox => {
@@ -472,17 +666,14 @@
                     });
                 });
                 
-                // Add event listener to category checkboxes to update 'Select All' state
                 document.querySelectorAll('.category-checkbox').forEach(checkbox => {
                     checkbox.addEventListener('change', updateSelectAllState);
                 });
             }
 
-            // Set up initial mode state
             const modeRadio = document.querySelector(`input[name="quiz-mode"][value="${quizMode}"]`);
             if(modeRadio) modeRadio.checked = true;
 
-            // Set up initial length state
             if (els.quizLengthSelect) {
                 els.quizLengthSelect.value = quizLength.toString();
             }
@@ -497,8 +688,10 @@
         }
 
 
-        // Initialize checkboxes when the page loads
-        document.addEventListener('DOMContentLoaded', renderCategoryCheckboxes);
+        document.addEventListener('DOMContentLoaded', () => {
+            initUnitSelector();
+            renderCategoryCheckboxes();
+        });
 
         // --- Data & Utility Functions ---
 
@@ -511,6 +704,7 @@
         }
 
         function normalizeText(text) {
+            // Remove punctuation and normalize spaces
             return text.toLowerCase()
                        .replace(/[.,;...¡!¿?]/g, "") 
                        .replace(/\s+/g, " ")         
@@ -542,6 +736,14 @@
                 toast.remove();
             }, 3000);
         }
+        
+        // NEW: Handle Enter Key Submission
+        function handleEnter(event) {
+            if (event.key === 'Enter' && quizMode === 'spelling' && !isAnswered) {
+                checkAnswer();
+            }
+        }
+
 
         // --- Navigation Functions ---
 
@@ -570,32 +772,29 @@
             hideAllScreens();
             screens.config.classList.remove('hidden');
             screens.config.classList.add('flex');
-            renderCategoryCheckboxes(); // Ensure current selection is displayed
+            // Re-render categories in case unit changed
+            renderCategoryCheckboxes();
         }
         
         function handleGameScreenBack() {
-            // Simple exit back to the start screen, losing current progress.
             showStartScreen();
             alertUser("Quiz exited. Back to menu.", 'text-slate-600');
         }
 
         function quickStartGame() {
-            // Set default configuration for quick start
             quizMode = 'spelling';
             quizLength = 10;
+            // Ensure we use all categories of the currently selected unit
             selectedCategories = Object.keys(groupedVocab);
             startGame(quizLength);
         }
 
         function applyConfigAndStartGame() {
-             // 1. Get Selected Categories
             selectedCategories = Array.from(document.querySelectorAll('.category-checkbox:checked')).map(cb => cb.value);
 
-            // 2. Get Quiz Mode
             const selectedMode = document.querySelector('input[name="quiz-mode"]:checked');
             quizMode = selectedMode ? selectedMode.value : 'spelling'; 
 
-            // 3. Get Quiz Length
             quizLength = parseInt(els.quizLengthSelect.value, 10);
 
             if (selectedCategories.length === 0) {
@@ -608,7 +807,6 @@
 
         function startGame(count) {
             
-            // Filter the database based on selected categories
             let filteredVocab = [];
             selectedCategories.forEach(categoryKey => {
                 if (groupedVocab[categoryKey]) {
@@ -632,7 +830,9 @@
             streak = 0;
             isAnswered = false;
 
-            // Update UI visibility
+            // Update Header Title
+            els.headerTitle.innerHTML = `<i class="fas fa-layer-group mr-2"></i>${currentUnitName} Quiz`;
+
             hideAllScreens();
             screens.game.classList.remove('hidden');
             screens.game.classList.add('flex');
@@ -643,50 +843,40 @@
         }
 
         function resetGame() {
-            // Restart with the current configuration
             startGame(currentQueue.length);
         }
         
-        // --- Hint Logic (Now unlimited) ---
+        // --- Hint Logic (Updated to reveal character per word) ---
         function showHint() {
             if (quizMode !== 'spelling' || isAnswered) return;
 
             const currentItem = currentQueue[currentIndex];
-            const correctAnswer = normalizeText(currentItem.es[0]); // Use first translation as the primary correct answer
-            const currentInput = normalizeText(els.input.value);
+            const primaryAnswer = currentItem.es[0]; 
+            const words = primaryAnswer.split(' ');
+            let revealedHintParts = [];
+            let allWordsCompleted = true;
 
-            // Find the index of the first differing character
-            let hintIndex = 0;
-            let currentInputClean = normalizeText(els.input.value);
-            
-            // Find the position where the input deviates from the correct answer
-            while (hintIndex < correctAnswer.length && hintIndex < currentInputClean.length && currentInputClean[hintIndex] === correctAnswer[hintIndex]) {
-                hintIndex++;
+            hintLevel++;
+
+            for (const word of words) {
+                const hintPart = word.substring(0, hintLevel);
+                revealedHintParts.push(hintPart);
+
+                if (hintPart.length < word.length) {
+                    allWordsCompleted = false;
+                }
             }
+            
+            const newInputValue = revealedHintParts.join(' ');
+            els.input.value = newInputValue;
+            els.input.focus();
+            
+            els.input.setSelectionRange(newInputValue.length, newInputValue.length);
 
-            // Only provide a hint if the user has not completed the correct answer
-            if (hintIndex < correctAnswer.length) {
-                const charToReveal = correctAnswer[hintIndex];
-                
-                // Get the original value up to the hint index
-                let originalValue = els.input.value.slice(0, hintIndex);
-                
-                // If the original value was shorter than the hint index, it means there were spaces/punctuation that got normalized.
-                // We ensure the new input value is built correctly from the prefix + new character.
-                const newInputValue = originalValue + charToReveal;
-                
-                // Set the new input value and move cursor to the end
-                els.input.value = newInputValue;
-                els.input.focus();
-                els.input.setSelectionRange(newInputValue.length, newInputValue.length);
-
-                alertUser(`Hint used: '${charToReveal}' revealed.`, 'text-blue-500');
-            } else if (currentInput === correctAnswer) {
-                // Answer is already correct
-                alertUser("You already have the correct answer!", 'text-green-500');
+            if (allWordsCompleted) {
+                alertUser("All letters revealed (check for accents and ensure it matches the full answer!).", 'text-blue-500');
             } else {
-                 // User has typed something incorrect *after* the correct answer length
-                 alertUser("The hint is available when you're stuck on the next required letter.", 'text-amber-500');
+                alertUser(`Hint used: Revealed up to letter ${hintLevel} of each word.`, 'text-blue-500');
             }
         }
 
@@ -695,7 +885,7 @@
         function generateMultipleChoiceOptions(currentItem) {
             const correctTranslation = currentItem.es[0];
             
-            // Filter the database to only include words from selected categories
+            // Distractors come from CURRENT unit's selected categories
             let filteredVocabForDistractors = [];
             selectedCategories.forEach(categoryKey => {
                 if (groupedVocab[categoryKey]) {
@@ -705,24 +895,18 @@
             
             const allTranslations = filteredVocabForDistractors.map(item => item.es[0]);
             
-            // Filter out the correct answer and any potential synonyms
             const correctNormalized = currentItem.es.map(s => normalizeText(s));
 
             const incorrectOptions = allTranslations.filter(ans => {
                 const normalizedAns = normalizeText(ans);
-                // Only keep options that are NOT one of the correct answers
                 return !correctNormalized.includes(normalizedAns);
             });
             
-            // Shuffle and pick up to 3 distractors
             const distractors = shuffle(incorrectOptions).slice(0, 3);
             
-            // Combine and shuffle the options
             const options = shuffle([correctTranslation, ...distractors]).slice(0, 4); 
             
-            // Handle edge case where we might get less than 4 options (e.g., if vocab list is small)
             while (options.length < 4) {
-                 // Fallback: If less than 4 options, pad with a generic placeholder
                  if (options.length < 4) options.push('...Missing Option...');
             }
 
@@ -739,15 +923,14 @@
             const currentItem = currentQueue[currentIndex];
             els.questionWord.textContent = currentItem.en;
             
-            // Reset state
             isAnswered = false;
+            hintLevel = 0; 
             els.messageArea.textContent = '';
-            els.messageArea.className = 'h-16 mt-4 flex items-center justify-center text-center font-medium'; // Reset class
+            els.messageArea.className = 'h-16 mt-4 flex items-center justify-center text-center font-medium';
             els.feedbackIcon.classList.add('hidden');
             els.submitBtn.classList.remove('hidden');
             els.nextBtn.classList.add('hidden');
             
-            // Ensure input is enabled/reset for spelling mode
             els.input.disabled = false;
             els.input.classList.remove('correct', 'incorrect');
             els.input.placeholder = "Type translation...";
@@ -760,7 +943,7 @@
                 els.hintBtn.classList.remove('hidden');
             } else { // Multiple Choice
                 els.spellingContainer.classList.add('hidden');
-                els.mcContainer.classList.remove('hidden');
+                els.mcContainer.classList.remove('hidden'); 
                 els.hintBtn.classList.add('hidden');
                 renderMultipleChoice(currentItem);
             }
@@ -783,12 +966,10 @@
         function selectMultipleChoice(button, selectedAnswer) {
             if (isAnswered) return;
 
-            // Clear previous selection highlight
             document.querySelectorAll('.mc-option').forEach(btn => {
                 btn.classList.remove('ring-4', 'ring-indigo-300', 'shadow-inner');
             });
 
-            // Highlight current selection
             button.classList.add('ring-4', 'ring-indigo-300', 'shadow-inner');
             selectedMCOption = selectedAnswer;
         }
@@ -828,10 +1009,8 @@
                 isCorrect = correctAnswers.some(ans => normalizeText(ans) === normalizeText(userAnswer));
                 correctAnswerString = correctAnswers.join(' / ');
 
-                // Show feedback on buttons
                 document.querySelectorAll('.mc-option').forEach(btn => {
                     const optionAnswer = btn.getAttribute('data-answer');
-                    // Check if the option is one of the correct answers
                     const isOptionCorrect = correctAnswers.some(ans => normalizeText(ans) === normalizeText(optionAnswer));
 
                     if (isOptionCorrect) {
@@ -840,10 +1019,9 @@
                     if (normalizeText(optionAnswer) === normalizeText(userAnswer) && !isCorrect) {
                         btn.classList.add('incorrect');
                     }
-                    btn.disabled = true; // Disable all buttons
+                    btn.disabled = true;
                 });
 
-                // Reset selected option state for next question
                 selectedMCOption = null; 
             }
 
@@ -871,12 +1049,10 @@
         }
 
         function nextQuestion() {
-            // Check if we are at the end of the queue
             if (currentIndex < currentQueue.length - 1) {
                 currentIndex++;
                 loadQuestion();
             } else {
-                // If we are at the last question, show the result screen
                 showResultScreen();
             }
         }
@@ -928,10 +1104,8 @@
                 const start = input.selectionStart;
                 const end = input.selectionEnd;
 
-                // Insert character at cursor position
                 input.value = input.value.substring(0, start) + char + input.value.substring(end);
                 
-                // Move cursor past the inserted character
                 input.focus();
                 input.selectionStart = input.selectionEnd = start + 1;
             }
