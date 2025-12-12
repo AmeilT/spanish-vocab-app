@@ -77,7 +77,7 @@
     <!-- Main Container -->
     <div class="w-full max-w-lg bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100 relative flex flex-col h-full max-h-[95vh]">
         
-        <!-- Header / Progress (Hidden on Level/Unit Selection) -->
+        <!-- Header / Progress -->
         <div id="header-section" class="bg-indigo-600 p-4 text-white hidden flex-shrink-0">
             <div class="flex justify-between items-center mb-2">
                 <!-- Back Button -->
@@ -149,6 +149,16 @@
                 <div class="p-6 overflow-y-auto flex-grow bg-slate-50">
                     <div id="unit-grid" class="grid grid-cols-2 gap-4">
                         <!-- Unit Cards Injected Here -->
+                    </div>
+                    <!-- All Units Challenge Button -->
+                    <div class="mt-6">
+                        <button onclick="selectAllUnitsChallenge()" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-4 px-6 rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 flex items-center justify-center">
+                            <i class="fas fa-trophy text-yellow-300 text-xl mr-3"></i>
+                            <div>
+                                <span class="block text-lg leading-none">All Units Challenge</span>
+                                <span class="text-xs font-normal opacity-80">Test across all topics!</span>
+                            </div>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -283,10 +293,23 @@
                         <div id="message-area" class="h-16 mt-4 flex items-center justify-center text-center font-medium"></div>
                     </div>
                     <div id="mc-mode-container" class="hidden flex flex-col space-y-3 pt-4"></div>
+                    
+                    <!-- NEW: Confidence Rating Container (Initially Hidden) -->
+                    <div id="confidence-container" class="hidden mt-4 pt-4 border-t border-slate-200">
+                        <p class="text-sm font-bold text-slate-500 uppercase text-center mb-3">How confident were you?</p>
+                        <div class="flex justify-between gap-2">
+                            <button onclick="rateConfidence(1)" class="flex-1 bg-red-100 hover:bg-red-200 text-red-600 font-bold py-3 rounded-lg text-sm transition-colors border border-red-200">1</button>
+                            <button onclick="rateConfidence(2)" class="flex-1 bg-orange-100 hover:bg-orange-200 text-orange-600 font-bold py-3 rounded-lg text-sm transition-colors border border-orange-200">2</button>
+                            <button onclick="rateConfidence(3)" class="flex-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-600 font-bold py-3 rounded-lg text-sm transition-colors border border-yellow-200">3</button>
+                            <button onclick="rateConfidence(4)" class="flex-1 bg-lime-100 hover:bg-lime-200 text-lime-600 font-bold py-3 rounded-lg text-sm transition-colors border border-lime-200">4</button>
+                            <button onclick="rateConfidence(5)" class="flex-1 bg-green-100 hover:bg-green-200 text-green-600 font-bold py-3 rounded-lg text-sm transition-colors border border-green-200">5</button>
+                        </div>
+                    </div>
                 </div>
                 <div class="w-full mt-auto flex-shrink-0 pb-2">
                     <div class="mt-2" id="action-buttons-container">
                         <button id="submit-btn" onclick="checkAnswer()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-200 transition-all transform active:scale-95">Check Answer</button>
+                        <!-- Note: Next Button now typically triggered by Confidence Rating if in Confidence Mode, but kept for fallback/skipping logic if needed, though we will hide it until rated -->
                         <button id="next-btn" onclick="nextQuestion()" class="hidden w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-teal-200 transition-all transform active:scale-95">Next Question <i class="fas fa-arrow-right ml-2"></i></button>
                     </div>
                 </div>
@@ -640,6 +663,9 @@
         let selectedCategories = [];
         let quizLength = 10;
         let hintLevel = 0; 
+        
+        // --- NEW: Weighting System for Confidence ---
+        let wordWeights = {}; // Map: word_key -> weight. Default weight = 1. Lower confidence increases weight.
 
         // DOM Elements
         const screens = {
@@ -677,7 +703,8 @@
             unitGrid: document.getElementById('unit-grid'), // New
             headerTitle: document.getElementById('header-title'),
             selectedUnitTitle: document.getElementById('selected-unit-title'),
-            selectedUnitIcon: document.getElementById('selected-unit-icon')
+            selectedUnitIcon: document.getElementById('selected-unit-icon'),
+            confidenceContainer: document.getElementById('confidence-container') // NEW
         };
 
         // --- Navigation Logic ---
@@ -735,6 +762,29 @@
             // Update Start Screen info
             els.selectedUnitTitle.textContent = unitName;
             els.selectedUnitIcon.innerHTML = `<i class="fas ${allVocabData[unitName].icon} text-4xl"></i>`;
+            
+            hideAllScreens();
+            screens.start.classList.remove('hidden');
+            screens.start.classList.add('flex');
+        }
+        
+        // NEW: Select All Units Challenge
+        function selectAllUnitsChallenge() {
+            currentUnitName = "All Units Challenge";
+            // Combine all data
+            let combinedData = {};
+            Object.values(allVocabData).forEach(unit => {
+                Object.entries(unit.data).forEach(([cat, items]) => {
+                    // Create unique category names to avoid collisions if identical names existed
+                    combinedData[cat] = items;
+                });
+            });
+            groupedVocab = combinedData;
+            selectedCategories = Object.keys(groupedVocab);
+            
+            // Update Start Screen
+            els.selectedUnitTitle.textContent = "All Units Challenge";
+            els.selectedUnitIcon.innerHTML = `<i class="fas fa-trophy text-4xl text-yellow-500"></i>`;
             
             hideAllScreens();
             screens.start.classList.remove('hidden');
@@ -839,11 +889,19 @@
         }
 
         function startGame(count) {
+            
             let filteredVocab = [];
             selectedCategories.forEach(categoryKey => {
                 if (groupedVocab[categoryKey]) {
                     filteredVocab.push(...groupedVocab[categoryKey]);
                 }
+            });
+
+            // Initialize/Normalize weights for current session if not present
+            // Note: In a real app with persistence, we'd load this from local storage
+            filteredVocab.forEach(item => {
+                const key = item.en; // Simple key
+                if (!wordWeights[key]) wordWeights[key] = 1; // Default weight
             });
 
             const maxCount = filteredVocab.length;
@@ -854,15 +912,18 @@
                  return;
             }
 
-            const shuffled = shuffle(filteredVocab);
-            currentQueue = shuffled.slice(0, finalCount);
+            // Weighted Selection Logic
+            // Instead of simple shuffle, we pick items based on weights
+            currentQueue = generateWeightedQueue(filteredVocab, finalCount);
             
             currentIndex = 0;
             score = 0;
             streak = 0;
             isAnswered = false;
 
-            els.headerTitle.innerHTML = `<i class="fas ${allVocabData[currentUnitName].icon} mr-2"></i>${currentUnitName}`;
+            // Use generic icon if in challenge mode
+            const iconClass = currentUnitName === "All Units Challenge" ? "fa-trophy" : allVocabData[currentUnitName].icon;
+            els.headerTitle.innerHTML = `<i class="fas ${iconClass} mr-2"></i>${currentUnitName}`;
 
             hideAllScreens();
             screens.game.classList.remove('hidden');
@@ -872,9 +933,43 @@
             updateStats();
             loadQuestion();
         }
+        
+        // NEW: Weighted Queue Generation
+        function generateWeightedQueue(vocabList, count) {
+            let queue = [];
+            // Create a temporary pool that honors weights
+            let pool = [...vocabList];
+            
+            for (let i = 0; i < count; i++) {
+                if (pool.length === 0) break;
+                
+                // Calculate total weight of current pool
+                let totalWeight = 0;
+                pool.forEach(item => {
+                    totalWeight += (wordWeights[item.en] || 1);
+                });
+                
+                let randomVal = Math.random() * totalWeight;
+                let selectedIndex = -1;
+                
+                for (let j = 0; j < pool.length; j++) {
+                    randomVal -= (wordWeights[pool[j].en] || 1);
+                    if (randomVal <= 0) {
+                        selectedIndex = j;
+                        break;
+                    }
+                }
+                // Fallback (rounding errors)
+                if (selectedIndex === -1) selectedIndex = pool.length - 1;
+                
+                queue.push(pool[selectedIndex]);
+                pool.splice(selectedIndex, 1); // Remove selected to avoid duplicates in single quiz run
+            }
+            return queue;
+        }
 
         function resetGame() {
-            startGame(currentQueue.length);
+            startGame(quizLength); // Re-roll the weighted queue
         }
 
         // --- Core Helpers ---
@@ -954,11 +1049,10 @@
         function generateMultipleChoiceOptions(currentItem) {
             const correctTranslation = currentItem.es[0];
             let filteredVocabForDistractors = [];
-            selectedCategories.forEach(categoryKey => {
-                if (groupedVocab[categoryKey]) {
-                    filteredVocabForDistractors.push(...groupedVocab[categoryKey]);
-                }
-            });
+            // Use current queue's source unit(s) logic roughly
+            // For simplicity, grab distractors from all current selected categories
+            Object.values(groupedVocab).flat().forEach(item => filteredVocabForDistractors.push(item));
+            
             const allTranslations = filteredVocabForDistractors.map(item => item.es[0]);
             const correctNormalized = currentItem.es.map(s => normalizeText(s));
             const incorrectOptions = allTranslations.filter(ans => {
@@ -987,6 +1081,7 @@
             els.feedbackIcon.classList.add('hidden');
             els.submitBtn.classList.remove('hidden');
             els.nextBtn.classList.add('hidden');
+            els.confidenceContainer.classList.add('hidden'); // Hide confidence on new question
             
             els.input.disabled = false;
             els.input.classList.remove('correct', 'incorrect');
@@ -1070,8 +1165,8 @@
 
             isAnswered = true;
             els.submitBtn.classList.add('hidden');
-            els.nextBtn.classList.remove('hidden');
-
+            
+            // Show Feedback
             if (isCorrect) {
                 score++;
                 streak++;
@@ -1086,7 +1181,36 @@
                 els.feedbackIcon.innerHTML = `<i class="fas fa-times-circle text-red-500"></i>`;
                 els.feedbackIcon.classList.remove('hidden');
             }
+            
+            // Show Confidence Rating instead of direct next button
+            els.confidenceContainer.classList.remove('hidden');
+            
             updateStats();
+        }
+        
+        // NEW: Handle Confidence Rating
+        function rateConfidence(rating) {
+            const currentItem = currentQueue[currentIndex];
+            const wordKey = currentItem.en;
+            
+            // Update Weights based on logic requested:
+            // 1-2: Low confidence -> Increase weight (see more often)
+            // 3: Medium -> Neutral
+            // 4-5: High confidence -> Decrease weight (see less often)
+            
+            let currentWeight = wordWeights[wordKey] || 1;
+            
+            if (rating <= 2) {
+                wordWeights[wordKey] = currentWeight + 2; // Increase significantly
+            } else if (rating === 3) {
+                // Neutral, maybe slight bump to ensure reinforcement
+                wordWeights[wordKey] = currentWeight + 0.5;
+            } else {
+                wordWeights[wordKey] = Math.max(0.1, currentWeight * 0.5); // Halve weight, min 0.1
+            }
+            
+            // Proceed to next question automatically
+            nextQuestion();
         }
 
         function nextQuestion() {
