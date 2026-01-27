@@ -103,7 +103,7 @@
         <!-- Screens -->
         <div class="flex-grow flex flex-col relative overflow-hidden min-h-0">
             
-            <!-- 1. Level Selection Screen (NEW) -->
+            <!-- 1. Level Selection Screen -->
             <div id="level-screen" class="absolute inset-0 p-8 flex flex-col justify-center items-center bg-white z-30 fade-in overflow-y-auto">
                 <div class="bg-indigo-100 p-6 rounded-full mb-6 text-indigo-600 flex-shrink-0">
                     <i class="fas fa-graduation-cap text-5xl"></i>
@@ -123,26 +123,26 @@
                         <i class="fas fa-chevron-right ml-auto text-slate-300 group-hover:text-indigo-500"></i>
                     </button>
 
-                    <button onclick="selectLevel(10)" class="w-full bg-white border-2 border-slate-100 hover:border-slate-300 p-4 rounded-2xl flex items-center transition-all opacity-75 hover:opacity-100 group">
-                        <div class="bg-slate-100 text-slate-400 p-3 rounded-xl mr-4">
+                    <button onclick="selectLevel(10)" class="w-full bg-white border-2 border-indigo-100 hover:border-indigo-500 hover:shadow-md p-4 rounded-2xl flex items-center transition-all group">
+                        <div class="bg-purple-100 text-purple-600 p-3 rounded-xl mr-4 group-hover:bg-purple-600 group-hover:text-white transition-colors">
                             <span class="font-bold text-xl">10</span>
                         </div>
                         <div class="text-left">
-                            <h3 class="font-bold text-slate-700 text-lg">Nivel 10</h3>
-                            <p class="text-slate-400 text-xs">Coming Soon</p>
+                            <h3 class="font-bold text-slate-800 text-lg">Nivel 10</h3>
+                            <p class="text-slate-500 text-xs">Advanced Storytelling</p>
                         </div>
-                        <i class="fas fa-lock ml-auto text-slate-300"></i>
+                        <i class="fas fa-chevron-right ml-auto text-slate-300 group-hover:text-purple-500"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- 2. Unit Selection Screen (NEW - Icon Grid) -->
+            <!-- 2. Unit Selection Screen (Icon Grid) -->
             <div id="unit-screen" class="absolute inset-0 flex flex-col bg-white z-20 hidden fade-in">
                 <div class="bg-white p-6 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
                     <button onclick="showLevelScreen()" class="text-slate-400 hover:text-indigo-600 transition-colors">
                         <i class="fas fa-arrow-left text-lg"></i>
                     </button>
-                    <h2 class="font-bold text-xl text-slate-800">Select Unit</h2>
+                    <h2 class="font-bold text-xl text-slate-800" id="unit-screen-title">Select Unit</h2>
                     <div class="w-6"></div> <!-- Spacer -->
                 </div>
                 
@@ -190,17 +190,7 @@
                 </div>
             </div>
 
-            <!-- 4. Nivel 10 Blank Screen -->
-            <div id="nivel10-screen" class="absolute inset-0 p-8 flex flex-col justify-center items-center bg-white z-30 hidden fade-in">
-                <div class="bg-slate-100 p-6 rounded-full mb-6 text-slate-400">
-                    <i class="fas fa-tools text-5xl"></i>
-                </div>
-                <h1 class="text-2xl font-bold mb-2 text-slate-800">Nivel 10</h1>
-                <p class="text-slate-500 text-center mb-8">This level is currently under construction.</p>
-                <button onclick="showLevelScreen()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-lg">
-                    Go Back
-                </button>
-            </div>
+            <!-- 4. Nivel 10 Blank Screen (REMOVED - Replaced with Unit Selection for L10) -->
 
             <!-- 5. Configuration Screen -->
             <div id="config-screen" class="absolute inset-0 flex flex-col bg-white z-20 hidden fade-in">
@@ -346,7 +336,7 @@
 
     <script>
         // --- Multi-Unit Data Structure ---
-        const allVocabData = {
+        const level9Data = {
             "Ciudades": {
                 icon: "fa-city",
                 data: {
@@ -545,6 +535,11 @@
                         { en: "to protest about", es: ["protestar por"] },
                         { en: "to be used for", es: ["servir para"] },
                         { en: "to work for", es: ["trabajar para"] }
+                    ],
+                    "PEDIR y DAR LAS GRACIAS": [
+                        { en: "to ask for something", es: ["pedir algo"] },
+                        { en: "to ask someone for something", es: ["pedir algo a alguien"] },
+                        { en: "to thank someone for something", es: ["dar las gracias a alguien por algo"] }
                     ]
                 }
             },
@@ -707,8 +702,97 @@
                 }
             }
         };
+        
+        const level10Data = {
+            "Anécdotas y Narración": {
+                icon: "fa-book-open",
+                data: {
+                    "Conectores para Narrar": [
+                        { en: "Because", es: ["porque"] },
+                        { en: "It turns out that", es: ["resulta que"] },
+                        { en: "And then", es: ["y entonces"] },
+                        { en: "Anyway / Long story short", es: ["total, que"] },
+                        { en: "So", es: ["así que"] },
+                        { en: "Right? / Don't you think?", es: ["¿no?"] },
+                        { en: "You know?", es: ["¿sabes?"] },
+                        { en: "In the end", es: ["al final"] },
+                        { en: "Since / As", es: ["como"] },
+                        { en: "So that / Therefore", es: ["de modo que"] }
+                    ],
+                    "Estructura de una Anécdota": [
+                        { en: "Once, a very strange thing happened to me...", es: ["a mí, una vez, me pasó una cosa muy rara"] },
+                        { en: "A strange thing happened to us...", es: ["a nosotros nos pasó una cosa extraña"] },
+                        { en: "I was at the beach with a friend and...", es: ["estaba en la playa con una amiga y"] },
+                        { en: "We were in a town on the Costa del Sol and...", es: ["estábamos en un pueblo de la costa del sol y"] },
+                        { en: "It was Sunday and there were many people.", es: ["era domingo y había mucha gente"] },
+                        { en: "We had bathed and sunbathed and...", es: ["nos habíamos bañado y habíamos tomado el sol y"] },
+                        { en: "And suddenly, a boy approaches us...", es: ["y, de pronto, se nos acerca un chico"] },
+                        { en: "And then I say to him: 'Hey, but what are you doing?'", es: ["y entonces yo le digo: oye, ¿pero qué haces?"] },
+                        { en: "And then he goes and says to me...", es: ["y entonces va él y me dice"] },
+                        { en: "And what did you do?", es: ["¿y tú qué hiciste?"] },
+                        { en: "And what did you guys say to him?", es: ["¿y vosotros qué le dijisteis?"] },
+                        { en: "And what happened in the end?", es: ["¿y qué pasó al final?"] },
+                        { en: "And how did it end?", es: ["¿y cómo terminó la cosa?"] },
+                        { en: "Anyway, it was quite uncomfortable.", es: ["total, que fue bastante incómodo"] },
+                        { en: "In the end, it was just a misunderstanding.", es: ["al final, fue solo un malentendido"] },
+                        { en: "Well, there wasn't any problem.", es: ["vamos, que no hubo ningún problema"] },
+                        { en: "Thank goodness nothing happened.", es: ["menos mal que no pasó nada"] },
+                        { en: "Luckily, it all came to nothing.", es: ["por suerte, todo se quedó en nada"] }
+                    ],
+                    "Reacciones": [
+                        { en: "How funny!", es: ["¡qué gracioso!"] },
+                        { en: "How horrible!", es: ["¡qué horror!"] },
+                        { en: "How ridiculous!", es: ["¡qué ridículo!"] },
+                        { en: "Wow! / That's heavy!", es: ["¡qué fuerte!"] },
+                        { en: "What a scare!", es: ["¡qué susto!"] },
+                        { en: "How scary!", es: ["¡qué miedo!"] },
+                        { en: "How gross!", es: ["¡qué asco!"] },
+                        { en: "How fun!", es: ["¡qué divertido!"] },
+                        { en: "How curious!", es: ["¡qué curioso!"] },
+                        { en: "How embarrassing!", es: ["¡qué vergüenza!"] },
+                        { en: "What a mess!", es: ["¡qué lío!"] },
+                        { en: "How great!", es: ["¡qué bien!"] },
+                        { en: "Well, thank goodness!", es: ["¡pues menos mal!"] },
+                        { en: "How lucky!", es: ["¡qué suerte!"] },
+                        { en: "What bad luck!", es: ["¡qué mala suerte!"] },
+                        { en: "You don't say!", es: ["¡qué dices!"] }
+                    ],
+                    "Funciones del Diálogo": [
+                        { en: "How annoying!", es: ["¡qué rabia!"] },
+                        { en: "What a drag!", es: ["¡qué rollo!"] },
+                        { en: "Oh yeah?", es: ["¿ah, sí?"] },
+                        { en: "To Cuba!", es: ["¡a cuba!"] },
+                        { en: "Yeah, clearly", es: ["ya, claro"] }
+                    ]
+                }
+            },
+            "Bromas y Humor": {
+                icon: "fa-laugh-beam",
+                data: {
+                    "Tipos de Broma": [
+                        { en: "Joke (verbal/story)", es: ["chiste", "un chiste", "el chiste"] },
+                        { en: "Prank / Joke (physical/action)", es: ["broma", "una broma", "la broma"] },
+                        { en: "Practical joke / Heavy prank", es: ["broma pesada", "una broma pesada"] },
+                        { en: "Prankster / Joker", es: ["bromista", "un bromista", "el bromista"] }
+                    ],
+                    "Acciones y Verbos": [
+                        { en: "To tell a joke", es: ["contar un chiste"] },
+                        { en: "To joke around / banter", es: ["bromear"] },
+                        { en: "To play pranks", es: ["gastar bromas", "hacer bromas"] },
+                        { en: "To burst out laughing", es: ["echarse a reír"] },
+                        { en: "To be funny (to someone)", es: ["hacer gracia"] }
+                    ],
+                    "Modismos y Expresiones": [
+                        { en: "To pull someone's leg / tease", es: ["tomar el pelo"] },
+                        { en: "To get a scare / be startled", es: ["darse un susto"] },
+                        { en: "To miss (someone) / find strange", es: ["extrañar"] }
+                    ]
+                }
+            }
+        };
 
         // State Variables
+        let currentLevel = 9;
         let currentUnitName = null;
         let groupedVocab = null;
         let currentQueue = [];
@@ -729,7 +813,6 @@
             level: document.getElementById('level-screen'), // New
             unit: document.getElementById('unit-screen'), // New
             start: document.getElementById('start-screen'),
-            nivel10: document.getElementById('nivel10-screen'), // New
             config: document.getElementById('config-screen'), 
             game: document.getElementById('game-screen'),
             result: document.getElementById('result-screen'),
@@ -761,7 +844,8 @@
             headerTitle: document.getElementById('header-title'),
             selectedUnitTitle: document.getElementById('selected-unit-title'),
             selectedUnitIcon: document.getElementById('selected-unit-icon'),
-            confidenceContainer: document.getElementById('confidence-container') // NEW
+            confidenceContainer: document.getElementById('confidence-container'), // NEW
+            unitScreenTitle: document.getElementById('unit-screen-title')
         };
 
         // --- Navigation Logic ---
@@ -778,15 +862,13 @@
 
         // 2. Select Level
         function selectLevel(level) {
+            currentLevel = level;
             hideAllScreens();
-            if (level === 9) {
-                renderUnitGrid();
-                screens.unit.classList.remove('hidden');
-                screens.unit.classList.add('flex');
-            } else {
-                screens.nivel10.classList.remove('hidden');
-                screens.nivel10.classList.add('flex');
-            }
+            renderUnitGrid(level);
+            // Update title based on level
+            els.unitScreenTitle.textContent = level === 9 ? "Nivel 9 Units" : "Nivel 10 Units";
+            screens.unit.classList.remove('hidden');
+            screens.unit.classList.add('flex');
         }
 
         function showLevelScreen() {
@@ -796,9 +878,11 @@
         }
 
         // 3. Render Unit Grid (Icons)
-        function renderUnitGrid() {
-            els.unitGrid.innerHTML = Object.keys(allVocabData).map(unitName => {
-                const unitData = allVocabData[unitName];
+        function renderUnitGrid(level) {
+            const dataToUse = level === 9 ? level9Data : level10Data;
+            
+            let gridHtml = Object.keys(dataToUse).map(unitName => {
+                const unitData = dataToUse[unitName];
                 return `
                     <div onclick="selectUnit('${unitName}')" class="unit-card bg-white p-4 rounded-2xl border-2 border-slate-100 cursor-pointer flex flex-col items-center justify-center text-center h-32 hover:border-indigo-200">
                         <div class="bg-indigo-50 text-indigo-600 p-3 rounded-full mb-3">
@@ -808,17 +892,35 @@
                     </div>
                 `;
             }).join('');
+            
+            // Add "All Units Challenge" button at the end if there are multiple units
+            if (Object.keys(dataToUse).length > 1) {
+                 gridHtml += `
+                    <div onclick="selectAllUnitsChallenge()" class="unit-card bg-gradient-to-r from-indigo-600 to-purple-600 p-4 rounded-2xl border-2 border-transparent cursor-pointer flex flex-col items-center justify-center text-center h-32 text-white shadow-lg col-span-2">
+                        <div class="bg-white/20 p-3 rounded-full mb-3">
+                            <i class="fas fa-trophy text-2xl text-yellow-300"></i>
+                        </div>
+                        <span class="font-bold text-sm leading-tight">All Units Challenge</span>
+                    </div>
+                `;
+            }
+            
+            els.unitGrid.innerHTML = gridHtml;
+            // Hide the separate button container used previously since it's integrated now
+            const oldButtonContainer = els.unitGrid.nextElementSibling;
+            if(oldButtonContainer) oldButtonContainer.style.display = 'none';
         }
 
         // 4. Select Unit -> Show Main Menu
         function selectUnit(unitName) {
             currentUnitName = unitName;
-            groupedVocab = allVocabData[unitName].data; // Access the data property
+            const dataToUse = currentLevel === 9 ? level9Data : level10Data;
+            groupedVocab = dataToUse[unitName].data; // Access the data property
             selectedCategories = Object.keys(groupedVocab); // Default select all
             
             // Update Start Screen info
             els.selectedUnitTitle.textContent = unitName;
-            els.selectedUnitIcon.innerHTML = `<i class="fas ${allVocabData[unitName].icon} text-4xl"></i>`;
+            els.selectedUnitIcon.innerHTML = `<i class="fas ${dataToUse[unitName].icon} text-4xl"></i>`;
             
             hideAllScreens();
             screens.start.classList.remove('hidden');
@@ -828,19 +930,26 @@
         // NEW: Select All Units Challenge
         function selectAllUnitsChallenge() {
             currentUnitName = "All Units Challenge";
+            const dataToUse = currentLevel === 9 ? level9Data : level10Data;
             // Combine all data
             let combinedData = {};
-            Object.values(allVocabData).forEach(unit => {
+            Object.values(dataToUse).forEach(unit => {
                 Object.entries(unit.data).forEach(([cat, items]) => {
                     // Create unique category names to avoid collisions if identical names existed
-                    combinedData[cat] = items;
+                    // We append a random ID or parent key to make unique if needed, but simple merge is fine for now
+                    // A better approach is to merge arrays if key exists
+                    if (combinedData[cat]) {
+                        combinedData[cat] = combinedData[cat].concat(items);
+                    } else {
+                        combinedData[cat] = items;
+                    }
                 });
             });
             groupedVocab = combinedData;
             selectedCategories = Object.keys(groupedVocab);
             
             // Update Start Screen
-            els.selectedUnitTitle.textContent = "All Units Challenge";
+            els.selectedUnitTitle.textContent = `All Level ${currentLevel} Challenge`;
             els.selectedUnitIcon.innerHTML = `<i class="fas fa-trophy text-4xl text-yellow-500"></i>`;
             
             hideAllScreens();
@@ -979,7 +1088,12 @@
             isAnswered = false;
 
             // Use generic icon if in challenge mode
-            const iconClass = currentUnitName === "All Units Challenge" ? "fa-trophy" : allVocabData[currentUnitName].icon;
+            let iconClass = "fa-trophy";
+            if (currentUnitName !== "All Units Challenge" && !currentUnitName.includes("All Level")) {
+                 const dataToUse = currentLevel === 9 ? level9Data : level10Data;
+                 iconClass = dataToUse[currentUnitName].icon;
+            }
+            
             els.headerTitle.innerHTML = `<i class="fas ${iconClass} mr-2"></i>${currentUnitName}`;
 
             hideAllScreens();
